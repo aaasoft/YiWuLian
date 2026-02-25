@@ -1,0 +1,41 @@
+﻿@page "/device"
+@using Quick.EntityFrameworkCore.Plus
+
+<PageTitle>设备管理</PageTitle>
+
+<MudToolBar>
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="Add" Class="mr-2">添加</MudButton>
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="Refresh">刷新</MudButton>
+</MudToolBar>
+
+<MudDataGrid T="Models.YIS_Device" Items="@Elements" SortMode="SortMode.Single" Filterable="true"
+    FilterMode="DataGridFilterMode.Simple">
+    <Columns>
+        <PropertyColumn Property="x => x.Name" Title="名称" />
+        <PropertyColumn Property="x => x.Id" Title="IMEI" />
+        <PropertyColumn Property="x => x.SimIMSI" Title="IMSI" />
+        <PropertyColumn Property="x => x.SimEnableDate" Title="启用日期" Format="yyyy-MM-dd" />
+        <PropertyColumn Property="x => Core.Interfaces.Device.Manager.Instance.GetDeviceConnectStatus(x.Id)" Filterable="false" Sortable="false" Title="连接状态" />
+        <TemplateColumn>
+            <CellTemplate>
+                <MudStack Row>
+                    <MudTooltip Text="编辑">
+                        <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" Color="Color.Inherit"
+                            OnClick="@(e => Edit(context.Item))" />
+                    </MudTooltip>
+                    <MudTooltip Text="删除">
+                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Color="Color.Inherit"
+                            OnClick="@(e => Delete(context.Item))" />
+                    </MudTooltip>
+                    <MudTooltip Text="日志">
+                        <MudIconButton Icon="@Icons.Material.Filled.Notes" Size="Size.Small" Color="Color.Inherit"
+                            OnClick="@(e => ShowLogs(context.Item))" />
+                    </MudTooltip>
+                </MudStack>
+            </CellTemplate>
+        </TemplateColumn>
+    </Columns>
+    <PagerContent>
+        <MudDataGridPager T="Models.YIS_Device" />
+    </PagerContent>
+</MudDataGrid>

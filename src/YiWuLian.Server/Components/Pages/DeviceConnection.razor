@@ -1,0 +1,21 @@
+﻿@page "/device_connection"
+@using Quick.EntityFrameworkCore.Plus
+@using YiWuLian.Server.Core.Interfaces.Device
+
+<PageTitle>设备连接</PageTitle>
+
+<MudDataGrid T="DeviceConnectionInfo" Items="@Elements" SortMode="SortMode.Single" Filterable="true"
+    FilterMode="DataGridFilterMode.Simple">
+    <Columns>
+        <PropertyColumn Property="x => x.Device.Name" Title="名称" />
+        <PropertyColumn Property="x => x.ClientProgram" Title="客户端" />
+        <PropertyColumn Property="x => x.Channel.LastConnectedTime" Title="连接时间" />
+        <PropertyColumn Property="x => x.Channel.BytesSent" Format="N0" Title="已发送" />
+        <PropertyColumn Property="x => x.Channel.BytesReceived" Format="N0" Title="已接收" />
+        <PropertyColumn Property="x => x.Channel.BytesSentPerSec" Format="N0" Title="每秒发送" />
+        <PropertyColumn Property="x => x.Channel.BytesReceivedPerSec" Format="N0" Title="每秒接收" />
+    </Columns>
+    <PagerContent>
+        <MudDataGridPager T="DeviceConnectionInfo" />
+    </PagerContent>
+</MudDataGrid>

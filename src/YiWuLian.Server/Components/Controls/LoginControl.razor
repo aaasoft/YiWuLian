@@ -1,0 +1,10 @@
+﻿<MudDialog>
+    <DialogContent>
+        <MudTextField Label="密码" Class="mt-3"
+         Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Rounded.Password" AdornmentColor="Color.Primary" Variant="Variant.Outlined"
+         @bind-Value="Password" For="@(() => Password)" InputType="InputType.Password"/>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Color="Color.Primary" OnClick="Submit" >登录</MudButton>
+    </DialogActions>
+</MudDialog>

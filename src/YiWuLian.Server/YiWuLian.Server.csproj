@@ -1,0 +1,39 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RollForward>Major</RollForward>
+	  <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)' == 'ReleaseSelfContained'">
+    <PublishSingleFile>true</PublishSingleFile>
+	  <PublishTrimmed>true</PublishTrimmed>
+    <TrimMode>partial</TrimMode>
+		<JsonSerializerIsReflectionEnabledByDefault>true</JsonSerializerIsReflectionEnabledByDefault>	
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MudBlazor" Version="8.*" />
+    <PackageReference Include="MudBlazor.Translations" Version="2.7.0" />
+    <PackageReference Include="Quick.EntityFrameworkCore.Plus.MySql" Version="2026.3.202" />
+    <PackageReference Include="Quick.EntityFrameworkCore.Plus.SQLite" Version="2026.3.202" />
+    <PackageReference Include="Quick.Protocol.AllClients" Version="2.6.6" />
+    <PackageReference Include="Quick.Protocol.WebSocket.Server.AspNetCore" Version="2.6.6" />
+    <PackageReference Include="Quick.Sms.CMCC.CloudMAS" Version="1.0.8" />
+    <PackageReference Include="YiQiDong.Core" Version="2026.9.129" />
+    <PackageReference Include="Blazored.LocalStorage" Version="4.5.0" />
+  </ItemGroup>
+  
+	<ItemGroup>
+		<None Update="YiQiDong.Image.json">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
+  
+	<ItemGroup>
+	  <ProjectReference Include="..\YiWuLian.Protocol\YiWuLian.Protocol.csproj" />
+	</ItemGroup>
+
+</Project>

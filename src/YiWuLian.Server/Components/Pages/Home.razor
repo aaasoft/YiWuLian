@@ -1,0 +1,35 @@
+﻿@page "/"
+@using Quick.EntityFrameworkCore.Plus
+
+<PageTitle>主页</PageTitle>
+
+<MudGrid Class="mt-4">
+    <MudItem lg="3" md="6">
+        <MudPaper Class="mud-theme-primary pt-4 pb-4">
+            <div role="group" class="d-flex flex-row gap-3 flex-grow-start">
+                <MudContainer Class="flex-auto">
+                    <MudText Typo="Typo.h4">@GetDevicesCount()
+                    </MudText>
+                    <MudText Typo="Typo.caption">设备</MudText>
+                </MudContainer>
+                <MudContainer Class="flex-1 align-self-center">
+                    <MudIcon Size="Size.Large" Icon="@Icons.Material.Filled.DeviceHub"></MudIcon>
+                </MudContainer>
+            </div>
+        </MudPaper>
+    </MudItem>
+    <MudItem lg="3" md="6">
+        <MudPaper Class="mud-theme-success pt-4 pb-4">
+            <div role="group" class="d-flex flex-row gap-3 flex-grow-start">
+                <MudContainer Class="flex-auto">
+                    <MudText Typo="Typo.h4">@GetConnectionCount()
+                    </MudText>
+                    <MudText Typo="Typo.caption">连接</MudText>
+                </MudContainer>
+                <MudContainer Class="flex-1 align-self-center">
+                    <MudIcon Size="Size.Large" Icon="@Icons.Material.Filled.ConnectedTv"></MudIcon>
+                </MudContainer>
+            </div>
+        </MudPaper>
+    </MudItem>
+</MudGrid>

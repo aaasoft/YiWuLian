@@ -1,0 +1,312 @@
+using YiWuLian.Server.Utils;
+using Quick.EntityFrameworkCore.Plus;
+using Quick.Fields;
+using YiQiDong.Agent;
+using YiQiDong.Core.Functions;
+using YiQiDong.Protocol.V1.Model;
+
+namespace YiWuLian.Server.Functions;
+
+public class Config : ModelJsonConfig<ConfigModel>
+{
+    public static Config Instance { get; private set; }
+    public override string Name => "配置";
+    public override int ExecuteTimeout => 5 * 60 * 1000;
+
+    private const string TAB_WEB = nameof(TAB_WEB);
+    private const string TAB_APP_DB = nameof(TAB_APP_DB);
+    private const string TAB_LOG_DB = nameof(TAB_LOG_DB);
+    private const string TAB_LICENSE = nameof(TAB_LICENSE);
+    private const string BTN_CHECK_LICENSE = nameof(BTN_CHECK_LICENSE);
+
+    public Config()
+     : base(
+        ConfigModelSerializerContext.Default2.ConfigModel,
+        AgentContext.Container?.ContainerFolder ?? string.Empty,
+        () => AgentContext.Container == null ? false : AgentContext.Container.AutoStart)
+    {
+        Instance = this;
+    }
+
+    private IDbContextConfigHandler appConfigHandler;
+
+    public override ConfigModel ReadConfig()
+    {
+        var config = base.ReadConfig();
+        appConfigHandler = DbUtils.AppDbUtils.GetDbContextConfigHandler(config.AppDbType, config.AppDbConfig);
+        return config;
+    }
+
+    public override void WriteConfig(ConfigModel model)
+    {
+        if (appConfigHandler != null)
+            model.AppDbConfig = DbUtils.AppDbUtils.SerializerConfigHandler(appConfigHandler);
+        base.WriteConfig(model);
+    }
+
+    protected FieldForGet getWebGroup(FunctionRequest request, ConfigModel requestModel, bool isReadOnly = false)
+    {
+        var model = requestModel ?? Model;
+
+        return new FieldForGet()
+        {
+            Id = TAB_WEB,
+            Type = FieldType.ContainerGroup,
+            Name = "WEB配置",
+            Children =
+            [
+                new()
+                    {
+                        Id =  nameof(ConfigModel.Urls),
+                        Name = "Web服务地址",
+                        Description = null,
+                        Input_AllowBlank = false,
+                        Input_RegularExpression = "^http://((\\d{1,2}|1\\d\\d|2[0-4]\\d|25[0-5])\\.(\\d{1,2}|1\\d\\d|2[0-4]\\d|25[0-5])\\.(\\d{1,2}|1\\d\\d|2[0-4]\\d|25[0-5])\\.(\\d{1,2}|1\\d\\d|2[0-4]\\d|25[0-5])|\\*)(\\:([0-9]|[1-9]\\d{1,3}|[1-5]\\d{4}|6[0-5]{2}[0-3][0-5]))?$",
+                        Type =  FieldType.InputText,
+                        Value = model.Urls,
+                        Input_ReadOnly = isReadOnly
+                    },
+                    new()
+                    {
+                        Id =  nameof(ConfigModel.Password),
+                        Name = "管理密码",
+                        Description = "默认密码：123456",
+                        Input_AllowBlank = false,
+                        Type =  FieldType.InputPassword,
+                        Value = model.Password,
+                        Input_ReadOnly = isReadOnly
+                    }
+            ]
+        };
+    }
+
+    protected FieldForGet getAppDbGroup(FunctionRequest request, ConfigModel requestModel, bool isReadOnly = false)
+    {
+        var model = requestModel ?? Model;
+        var appDbConfigRequest = new FieldsForPostContainer();
+        //准备Children
+        var appDbConfigRequestFieldList = new List<FieldForPost>();
+        if (isReadOnly)
+        {
+            appDbConfigRequestFieldList.Add
+            (
+                new()
+                {
+                    Id = AbstractDbContextConfigHandler.Quick_EntityFrameworkCore_Plus_AbstractDbContextConfigHandler_IsReadOnly,
+                    Value = isReadOnly.ToString()
+                }
+            );
+        }
+        if (request != null)
+        {
+            //准备FieldIds
+            if (request.IsFieldIdsMatch(TAB_APP_DB, nameof(Model.AppDbConfig)))
+            {
+                appDbConfigRequest.FieldIds = request.FieldIds.Skip(2).ToArray();
+            }
+            var otherChildren = request.GetField(nameof(Model.AppDbConfig)).Children;
+            if (otherChildren != null)
+                appDbConfigRequestFieldList.AddRange(otherChildren);
+        }
+        appDbConfigRequest.Fields = appDbConfigRequestFieldList.ToArray();
+
+        appConfigHandler = DbUtils.AppDbUtils.GetDbContextConfigHandler(model.AppDbType, model.AppDbConfig);
+        var list = new List<FieldForGet>
+            {
+                new ()
+                {
+                    Id=nameof(Model.AppDbType),
+                    Name="数据库类型",
+                    Type= FieldType.InputSelect,
+                    InputSelect_Options = DbUtils.AppDbUtils.GetDbTypeDict(),
+                    PostOnChanged=true,
+                    Value = model.AppDbType,
+                    Input_ReadOnly = isReadOnly
+                }
+            };
+        if (model.AppDbType == "Quick.EntityFrameworkCore.Plus.SQLite.SQLiteDbContextConfigHandler")
+        {
+            list.Add(new()
+            {
+                Name = "警告",
+                Input_AllowBlank = false,
+                Type = FieldType.Alert,
+                Theme = FieldTheme.Danger,
+                Description = "一般只在开发和调试的情况下使用SQLite数据库，生产环境建议使用其他数据库！",
+                Input_ReadOnly = isReadOnly
+            });
+        }
+        list.AddRange(
+        [
+            new ()
+            {
+                Id=nameof(Model.AppDbConfig),
+                Type = FieldType.ContainerRow,
+                Children=
+                [
+                    new ()
+                    {
+                        Type = FieldType.HtmlDiv,
+                        ColumnWidth = 0,
+                        Children =  appConfigHandler.QuickFields_Request(appDbConfigRequest)
+                    }
+                ]
+            },
+            new FieldForGet()
+            {
+                Type = FieldType.ContainerRow,
+                Margin = 1
+            }
+        ]);
+        return new FieldForGet()
+        {
+            Id = TAB_APP_DB,
+            Type = FieldType.ContainerGroup,
+            Name = "数据库连接",
+            Children = list.ToArray()
+        };
+    }
+
+    protected FieldForGet getDeviceInterfaceGroup(FunctionRequest request, ConfigModel requestModel, bool isReadOnly = false)
+    {
+        var model = requestModel ?? Model;
+        return new FieldForGet()
+        {
+            Id = "DeviceInterface",
+            Type = FieldType.ContainerGroup,
+            Name = "设备服务",
+            Children =
+            [
+                new()
+                {
+                    Id = nameof(ConfigModel.DeviceInterfacePassword),
+                    Name = "密码",
+                    Description = "默认密码：123456",
+                    Input_AllowBlank = false,
+                    Type = FieldType.InputText,
+                    Value = model.DeviceInterfacePassword,
+                    Input_ReadOnly = isReadOnly
+                },
+                new ()
+                {
+                    Id = "Pipe",
+                    Name = "管道",
+                    Type = FieldType.ContainerGroup,
+                    Children =
+                    [
+                        new()
+                        {
+                            Id = nameof(ConfigModel.DeviceInterfacePipeEnable),
+                            Name = "启用",
+                            Description = "接口地址示例：qp.pipe://./YiWuLian.Server.ClientInterface",
+                            Input_AllowBlank = false,
+                            Type = FieldType.InputSelect,
+                            InputSelect_Options = new Dictionary<string,string>()
+                            {
+                                [true.ToString()] = "是",
+                                [false.ToString()] = "否"
+                            },
+                            PostOnChanged = true,
+                            Value = model.DeviceInterfacePipeEnable.ToString(),
+                            Input_ReadOnly = isReadOnly
+                        },
+                        new()
+                        {
+                            Id = nameof(ConfigModel.DeviceInterfacePipeName),
+                            Name = "管道名称",
+                            Input_AllowBlank = false,
+                            Type = model.DeviceInterfacePipeEnable ? FieldType.InputText: FieldType.InputHidden,
+                            Value = model.DeviceInterfacePipeName,
+                            Input_ReadOnly = isReadOnly
+                        },
+                    ]
+                },
+                new ()
+                {
+                    Id = "WebSocket",
+                    Name = "WebSocket",
+                    Type = FieldType.ContainerGroup,
+                    Children =
+                    [
+                        new()
+                        {
+                            Id = nameof(ConfigModel.DeviceInterfaceWebSocketEnable),
+                            Name = "启用",
+                            Description = "接口地址示例：qp.ws://127.0.0.1:8097/ws/client",
+                            Input_AllowBlank = false,
+                            Type = FieldType.InputSelect,
+                            InputSelect_Options = new Dictionary<string,string>()
+                            {
+                                [true.ToString()] = "是",
+                                [false.ToString()] = "否"
+                            },
+                            PostOnChanged = true,
+                            Value = model.DeviceInterfaceWebSocketEnable.ToString(),
+                            Input_ReadOnly = isReadOnly
+                        }      
+                    ]
+                },
+                new ()
+                {
+                    Id = "TCP",
+                    Name = "TCP",
+                    Type = FieldType.ContainerGroup,
+                    Children =
+                    [
+                        new()
+                        {
+                            Id = nameof(ConfigModel.DeviceInterfaceTcpEnable),
+                            Name = "启用",
+                            Description = "接口地址示例：qp.tcp://127.0.0.1:8097",
+                            Input_AllowBlank = false,
+                            Type = FieldType.InputSelect,
+                            InputSelect_Options = new Dictionary<string,string>()
+                            {
+                                [true.ToString()] = "是",
+                                [false.ToString()] = "否"
+                            },
+                            PostOnChanged = true,
+                            Value = model.DeviceInterfaceTcpEnable.ToString(),
+                            Input_ReadOnly = isReadOnly
+                        },
+                        new()
+                        {
+                            Id = nameof(ConfigModel.DeviceInterfaceTcpListenAddress),
+                            Name = "监听地址",
+                            Input_AllowBlank = false,
+                            Type = model.DeviceInterfaceTcpEnable ? FieldType.InputText: FieldType.InputHidden,
+                            Value = model.DeviceInterfaceTcpListenAddress,
+                            Input_ReadOnly = isReadOnly
+                        },
+                        new()
+                        {
+                            Id = nameof(ConfigModel.DeviceInterfaceTcpListenPort),
+                            Name = "监听端口",
+                            Input_AllowBlank = false,
+                            Type = model.DeviceInterfaceTcpEnable ? FieldType.InputText: FieldType.InputHidden,
+                            Value = model.DeviceInterfaceTcpListenPort.ToString(),
+                            Input_ReadOnly = isReadOnly
+                        }
+                    ]
+                }
+            ]
+        };
+    }
+
+    protected override List<FieldForGet> innerGet(FunctionRequest request, ConfigModel requestModel, bool isReadOnly = false)
+    {
+        return new List<FieldForGet>()
+            {
+                new FieldForGet()
+                {
+                    Type = FieldType.ContainerTab,
+                    Children =
+                    [
+                        getWebGroup(request,requestModel,isReadOnly),
+                        getAppDbGroup(request,requestModel,isReadOnly),
+                        getDeviceInterfaceGroup(request,requestModel,isReadOnly)
+                    ]
+                }
+            };
+    }
+}

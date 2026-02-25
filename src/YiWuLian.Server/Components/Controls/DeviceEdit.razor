@@ -1,0 +1,21 @@
+﻿@using Quick.EntityFrameworkCore.Plus
+
+<MudDialog>
+    <DialogContent>
+        <MudTextField @bind-Value="@Model.Name" Label="名称" HelperText="设备的名称" Variant="Variant.Outlined" />
+        <MudTextField @bind-Value="@Model.Id" Label="IMEI" Variant="Variant.Outlined" ReadOnly="!IsAdd"
+            HelperText="国际移动设备识别码，15位数字，通过配置工具查看。" />
+        <MudTextField @bind-Value="@Model.ICCID" Label="ICCID" Variant="Variant.Outlined"
+            HelperText="集成电路卡识别码，20位字符，通过配置工具查看。" />
+        <MudTextField @bind-Value="@Model.SimIMSI" Label="IMSI" Variant="Variant.Outlined"
+            HelperText="国际移动用户识别码，15位数字，通过配置工具查看。" />
+        <MudTextField @bind-Value="@Model.SimPuk" Label="PUK" Variant="Variant.Outlined"
+            HelperText="个人解锁码，8位数字，SIM卡大卡刮开涂层可以看到。" />
+        <MudDatePicker @bind-Date="@Model.SimEnableDate" Label="启用日期" HelperText="SIM卡的启用日期。"
+            Variant="Variant.Outlined" />
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">取消</MudButton>
+        <MudButton Color="Color.Primary" OnClick="Submit">确定</MudButton>
+    </DialogActions>
+</MudDialog>
