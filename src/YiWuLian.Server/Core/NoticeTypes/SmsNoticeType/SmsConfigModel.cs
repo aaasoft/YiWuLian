@@ -51,4 +51,13 @@ public class SmsConfigModel
     /// 模板ID
     /// </summary>
     public string TemplateId { get; set; } = "";
+    /// <summary>
+    /// 设备断开通知持续分钟数
+    /// </summary>
+    [JsonConverter(typeof(JsonInt32Converter))]
+    public int DeviceDisconnectNoticeDurationMinutes { get; set; } = 1;
+    /// <summary>
+    /// 设备断开通知目标
+    /// </summary>
+    public string DeviceDisconnectNoticeTarget { get; set; }
 }

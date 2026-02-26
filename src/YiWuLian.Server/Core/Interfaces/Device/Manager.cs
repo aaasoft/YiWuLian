@@ -36,6 +36,8 @@ namespace YiWuLian.Server.Core.Interfaces.Device
         }
 
         private Dictionary<string, DeviceConnectionInfo> connectedDeviceDict;
+        private Dictionary<string, CancellationTokenSource> disconnectNoticeCtsDict;
+
         public DeviceConnectionInfo[] ConnectedDevices { get; private set; } = [];
 
         public string GetDeviceConnectStatus(string deviceId)
@@ -49,6 +51,7 @@ namespace YiWuLian.Server.Core.Interfaces.Device
         public void Start()
         {
             connectedDeviceDict = new();
+            disconnectNoticeCtsDict = new();
             allInterface.Start(config, commandExecuterManagerForRegister, noticeHandlerManager);
         }
 
@@ -121,11 +124,18 @@ namespace YiWuLian.Server.Core.Interfaces.Device
                 Thread.Sleep(100);
             }
             //准备新连接
+            lock (disconnectNoticeCtsDict)
+            {
+                if (disconnectNoticeCtsDict.Remove(device.Id, out var cts))
+                    cts.Cancel();
+                disconnectNoticeCtsDict[device.Id] = new();
+            }
             var deviceConnectionInfo = new DeviceConnectionInfo()
             {
                 Device = device,
                 ClientProgram = request.ClientProgram,
-                Channel = channel
+                Channel = channel,
+                ConnectTime = DateTime.Now
             };
             channel.Tag = deviceConnectionInfo;
             lock (connectedDeviceDict)
@@ -147,9 +157,35 @@ namespace YiWuLian.Server.Core.Interfaces.Device
                 {
                     DeviceId = device.Id,
                     DeviceName = device.Name,
-                    Content = $"已断开，通道：{channel.ChannelName}，本次连接流量: 发送[{storageUnitStringConverting.GetString(channel.BytesSent, 1, true)}B],接收[{storageUnitStringConverting.GetString(channel.BytesReceived, 1, true)}B]。",
+                    Content = $"已断开，通道：{channel.ChannelName}，连接持续时间：{DateTime.Now - deviceConnectionInfo.ConnectTime}，本次连接流量: 发送[{storageUnitStringConverting.GetString(channel.BytesSent, 1, true)}B],接收[{storageUnitStringConverting.GetString(channel.BytesReceived, 1, true)}B]",
                     Time = DateTime.Now
                 });
+                CancellationTokenSource disconnectNoticeCts = null;
+                lock (disconnectNoticeCtsDict)
+                    disconnectNoticeCtsDict.TryGetValue(device.Id, out disconnectNoticeCts);
+                if(disconnectNoticeCts!=null)
+                    Task.Delay(TimeSpan.FromMinutes(1), disconnectNoticeCts.Token).ContinueWith(t =>
+                    {
+                        if(t.IsCanceled)
+                            return;
+                        //如果配置了设备断开时通知，则进行通知
+                        if (Agent.Instance.Config.SmsConfig.Enable && !string.IsNullOrEmpty(Agent.Instance.Config.SmsConfig.DeviceDisconnectNoticeTarget))
+                        {
+                            var noticeType = NoticeTypeManager.Instance.Get("sms");
+                            noticeType.SendNotice(device, new()
+                            {
+                                NoticeTypeId = noticeType.Id,
+                                Target = Agent.Instance.Config.SmsConfig.DeviceDisconnectNoticeTarget,
+                                Content = $"{device}已断开，通道：{channel.ChannelName}，连接持续时间：{DateTime.Now - deviceConnectionInfo.ConnectTime}，本次连接流量: 发送[{storageUnitStringConverting.GetString(channel.BytesSent, 1, true)}B],接收[{storageUnitStringConverting.GetString(channel.BytesReceived, 1, true)}B]"
+                            });
+                        }
+                        //清除
+                        lock (disconnectNoticeCtsDict)
+                        {
+                            if (disconnectNoticeCtsDict.Remove(device.Id, out var cts))
+                                cts.Cancel();
+                        }
+                    });
             };
             channel.Disconnected += handler;
             channel.AddCommandExecuterManager(commandExecuterManager);
@@ -157,7 +193,7 @@ namespace YiWuLian.Server.Core.Interfaces.Device
             {
                 DeviceId = device.Id,
                 DeviceName = device.Name,
-                Content = $"已连接，通道：{channel.ChannelName}。",
+                Content = $"已连接，通道：{channel.ChannelName}，客户端：{request.ClientProgram}",
                 Time = DateTime.Now
             });
             return new YlIotProtocol.V1.Commands.Register.Response();

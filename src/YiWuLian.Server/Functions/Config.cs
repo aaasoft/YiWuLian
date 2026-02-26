@@ -386,6 +386,26 @@ public class Config : ModelJsonConfig<ConfigModel>
                     Type =  FieldType.InputText,
                     Value = model.SmsConfig.TemplateId,
                     Input_ReadOnly = isReadOnly
+                },
+                new()
+                {
+                    Id =  nameof(model.SmsConfig.DeviceDisconnectNoticeDurationMinutes),
+                    Name = "设备断开通知持续分钟数",
+                    Description = null,
+                    Input_AllowBlank = false,
+                    Type =  FieldType.InputNumber,
+                    Value = model.SmsConfig.DeviceDisconnectNoticeDurationMinutes.ToString(),
+                    Input_ReadOnly = isReadOnly
+                },
+                new()
+                {
+                    Id =  nameof(model.SmsConfig.DeviceDisconnectNoticeTarget),
+                    Name = "设备断开通知目标",
+                    Description = "如果为空，则不通知",
+                    Input_AllowBlank = false,
+                    Type =  FieldType.InputText,
+                    Value = model.SmsConfig.DeviceDisconnectNoticeTarget,
+                    Input_ReadOnly = isReadOnly
                 }
             ]
         };
