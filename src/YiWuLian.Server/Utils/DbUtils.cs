@@ -59,7 +59,7 @@ namespace YiWuLian.Server.Utils
 
         public Dictionary<string, string> GetDbTypeDict() => configHandlerDict.ToDictionary(t => t.Key, t => t.Value.Name);
 
-        public IDbContextConfigHandler GetDbContextConfigHandler(string dbType, JsonNode dbConfig)
+        public IDbContextConfigHandler GetDbContextConfigHandler(string dbType, JsonNode dbConfig = null)
         {
             if (string.IsNullOrEmpty(dbType))
                 dbType = configHandlerDict.FirstOrDefault().Key;

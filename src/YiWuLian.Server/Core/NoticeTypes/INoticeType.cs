@@ -23,6 +23,11 @@ public interface INoticeType
     /// </summary>
     public string TargetTypeName { get; }
     /// <summary>
+    /// 是否启用
+    /// </summary>
+    public bool Enable { get; }
+
+    /// <summary>
     /// 启动
     /// </summary>
     public void Start();

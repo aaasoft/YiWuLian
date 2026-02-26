@@ -17,14 +17,19 @@ public class NoticeType : INoticeType
 
     public string TargetTypeName => "电话号码";
 
+    public bool Enable => config.Enable;
+
     private HttpApiClient httpApiClient;
-    private SmsConfigModel config;
+    private SmsConfigModel config;    
+
+    public NoticeType()
+    {
+        config = Agent.Instance.Config.SmsConfig;
+    }
 
     public void Start()
     {
-        Stop();
-
-        config = NoticeTypeManager.Instance.GetNoticeTypeConfig(Id, SmsConfigModelSerializerContext.Default2.SmsConfigModel, out _);
+        Stop();        
         httpApiClient = new HttpApiClient(new HttpApiClientOptions()
         {
             url = config.ApiAddress,

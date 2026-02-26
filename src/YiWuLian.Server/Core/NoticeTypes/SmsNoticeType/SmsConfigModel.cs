@@ -1,6 +1,7 @@
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using YiQiDong.Core.JsonConverters;
 
 namespace YiWuLian.Server.Core.NoticeTypes.SmsNoticeType;
 
@@ -17,6 +18,11 @@ public partial class SmsConfigModelSerializerContext : JsonSerializerContext
 
 public class SmsConfigModel
 {
+    /// <summary>
+    /// 是否启用
+    /// </summary>
+    [JsonConverter(typeof(JsonBoolConverter))]
+    public bool Enable { get; set; } = true;
     /// <summary>
     /// API地址
     /// </summary>

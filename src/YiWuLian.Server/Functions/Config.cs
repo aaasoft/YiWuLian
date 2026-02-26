@@ -4,6 +4,7 @@ using Quick.Fields;
 using YiQiDong.Agent;
 using YiQiDong.Core.Functions;
 using YiQiDong.Protocol.V1.Model;
+using System.Text.Json;
 
 namespace YiWuLian.Server.Functions;
 
@@ -65,7 +66,7 @@ public class Config : ModelJsonConfig<ConfigModel>
                         Name = "管理密码",
                         Description = "默认密码：123456",
                         Input_AllowBlank = false,
-                        Type =  FieldType.InputPassword,
+                        Type =  FieldType.InputText,
                         Value = model.Password,
                         Input_ReadOnly = isReadOnly
                     }
@@ -92,10 +93,11 @@ public class Config : ModelJsonConfig<ConfigModel>
         }
         if (request != null)
         {
+            var prefixFieldIds = new string[] { nameof(Model.AppDbConfig) };
             //准备FieldIds
-            if (request.IsFieldIdsMatch(nameof(Model.AppDbConfig)))
+            if (request.IsFieldIdsMatch(prefixFieldIds))
             {
-                appDbConfigRequest.FieldIds = request.FieldIds.Skip(2).ToArray();
+                appDbConfigRequest.FieldIds = request.FieldIds.Skip(prefixFieldIds.Length).ToArray();
             }
             else
             {
@@ -107,8 +109,7 @@ public class Config : ModelJsonConfig<ConfigModel>
                 appDbConfigRequestFieldList.AddRange(otherChildren);
         }
         appDbConfigRequest.Fields = appDbConfigRequestFieldList.ToArray();
-
-        appConfigHandler = DbUtils.AppDbUtils.GetDbContextConfigHandler(model.AppDbType, model.AppDbConfig);
+        appConfigHandler = DbUtils.AppDbUtils.GetDbContextConfigHandler(model.AppDbType);
         var list = new List<FieldForGet>
             {
                 new ()
@@ -169,7 +170,6 @@ public class Config : ModelJsonConfig<ConfigModel>
         var model = requestModel ?? Model;
         return new FieldForGet()
         {
-            Id = "DeviceInterface",
             Type = FieldType.ContainerGroup,
             Name = "设备服务",
             Children =
@@ -186,7 +186,6 @@ public class Config : ModelJsonConfig<ConfigModel>
                 },
                 new ()
                 {
-                    Id = "Pipe",
                     Name = "管道",
                     Type = FieldType.ContainerGroup,
                     Children =
@@ -220,7 +219,6 @@ public class Config : ModelJsonConfig<ConfigModel>
                 },
                 new ()
                 {
-                    Id = "WebSocket",
                     Name = "WebSocket",
                     Type = FieldType.ContainerGroup,
                     Children =
@@ -245,7 +243,6 @@ public class Config : ModelJsonConfig<ConfigModel>
                 },
                 new ()
                 {
-                    Id = "TCP",
                     Name = "TCP",
                     Type = FieldType.ContainerGroup,
                     Children =
@@ -290,6 +287,107 @@ public class Config : ModelJsonConfig<ConfigModel>
         };
     }
 
+    
+    protected FieldForGet getSmsServiceGroup(FunctionRequest request, ConfigModel requestModel, bool isReadOnly = false)
+    {
+        var model = requestModel ?? Model;
+
+        return new FieldForGet()
+        {
+            Id = nameof(model.SmsConfig),
+            Type = FieldType.ContainerGroup,
+            Name = "短信服务",
+            Children =
+            [
+                new()
+                {
+                    Id = nameof(model.SmsConfig.Enable),
+                    Name = "启用",
+                    Input_AllowBlank = false,
+                    Type = FieldType.InputSelect,
+                    InputSelect_Options = new Dictionary<string,string>()
+                    {
+                        [true.ToString()] = "是",
+                        [false.ToString()] = "否"
+                    },
+                    PostOnChanged = true,
+                    Value = model.SmsConfig.Enable.ToString(),
+                    Input_ReadOnly = isReadOnly
+                },
+                new()
+                {
+                    Id =  nameof(model.SmsConfig.ApiAddress),
+                    Name = "API地址",
+                    Description = null,
+                    Input_AllowBlank = false,
+                    Type =  FieldType.InputText,
+                    Value = model.SmsConfig.ApiAddress,
+                    Input_ReadOnly = isReadOnly
+                },
+                new()
+                {
+                    Id =  nameof(model.SmsConfig.EcName),
+                    Name = "企业名称",
+                    Description = null,
+                    Input_AllowBlank = false,
+                    Type =  FieldType.InputText,
+                    Value = model.SmsConfig.EcName,
+                    Input_ReadOnly = isReadOnly
+                },
+                new()
+                {
+                    Id =  nameof(model.SmsConfig.AddSerial),
+                    Name = "扩展码",
+                    Description = null,
+                    Input_AllowBlank = false,
+                    Type =  FieldType.InputText,
+                    Value = model.SmsConfig.AddSerial,
+                    Input_ReadOnly = isReadOnly
+                },
+                new()
+                {
+                    Id =  nameof(model.SmsConfig.ApId),
+                    Name = "接口账号用户名",
+                    Description = null,
+                    Input_AllowBlank = false,
+                    Type =  FieldType.InputText,
+                    Value = model.SmsConfig.ApId,
+                    Input_ReadOnly = isReadOnly
+                },
+                new()
+                {
+                    Id =  nameof(model.SmsConfig.SecretKey),
+                    Name = "接口账号密码",
+                    Description = null,
+                    Input_AllowBlank = false,
+                    Type =  FieldType.InputText,
+                    Value = model.SmsConfig.SecretKey,
+                    Input_ReadOnly = isReadOnly
+                },
+                new()
+                {
+                    Id =  nameof(model.SmsConfig.Sign),
+                    Name = "签名编码",
+                    Description = null,
+                    Input_AllowBlank = false,
+                    Type =  FieldType.InputText,
+                    Value = model.SmsConfig.Sign,
+                    Input_ReadOnly = isReadOnly
+                },
+                new()
+                {
+                    Id =  nameof(model.SmsConfig.TemplateId),
+                    Name = "模板ID",
+                    Description = null,
+                    Input_AllowBlank = false,
+                    Type =  FieldType.InputText,
+                    Value = model.SmsConfig.TemplateId,
+                    Input_ReadOnly = isReadOnly
+                }
+            ]
+        };
+    }
+
     protected override List<FieldForGet> innerGet(FunctionRequest request, ConfigModel requestModel, bool isReadOnly = false)
     {
         return new List<FieldForGet>()
@@ -301,7 +399,8 @@ public class Config : ModelJsonConfig<ConfigModel>
                     [
                         getWebGroup(request,requestModel,isReadOnly),
                         getAppDbGroup(request,requestModel,isReadOnly),
-                        getDeviceInterfaceGroup(request,requestModel,isReadOnly)
+                        getDeviceInterfaceGroup(request,requestModel,isReadOnly),
+                        getSmsServiceGroup(request,requestModel,isReadOnly)
                     ]
                 }
             };
