@@ -1,11 +1,10 @@
 ﻿using Quick.Protocol;
 using YiWuLian.Server.Core.Interfaces.Core;
-using YiQiDong.Agent;
 using Quick.EntityFrameworkCore.Plus;
 using Quick.Protocol.Utils;
 using YiWuLian.Server.Models;
-using Quick.EntityFrameworkCore.Plus.Utils;
 using YiWuLian.Server.Core.NoticeTypes;
+using Quick.Utils;
 
 namespace YiWuLian.Server.Core.Interfaces.Device
 {
@@ -153,7 +152,7 @@ namespace YiWuLian.Server.Core.Interfaces.Device
                 {
                     DeviceId = device.Id,
                     DeviceName = device.Name,
-                    Content = $"已断开，通道：{channel.ChannelName}，连接持续时间：{DateTime.Now - deviceConnectionInfo.ConnectTime}，本次连接流量: 发送[{storageUnitStringConverting.GetString(channel.BytesSent, 1, true)}B],接收[{storageUnitStringConverting.GetString(channel.BytesReceived, 1, true)}B]",
+                    Content = $"已断开，通道：{channel.ChannelName}，连接持续时间：{DateTime.Now - deviceConnectionInfo.ConnectTime}，本次连接流量: 发送[{storageUnitStringConverting.GetString(channel.BytesSent, 2, true)}B],接收[{storageUnitStringConverting.GetString(channel.BytesReceived, 2, true)}B]",
                     Time = DateTime.Now
                 });
                 if (Agent.Instance.Config.DeviceDisconnectNoticeDurationMinutes > 0)

@@ -1,7 +1,7 @@
 using Quick.Fields;
+using Quick.Utils;
 using YiQiDong.Agent;
 using YiQiDong.Core;
-using YiQiDong.Core.Utils;
 using YiQiDong.Protocol.V1.Model;
 using YiWuLian.Server.Core.NoticeTypes;
 

@@ -1,6 +1,6 @@
 using Quick.Sms.CMCC.CloudMAS;
+using Quick.Utils;
 using YiQiDong.Agent;
-using YiQiDong.Core.Utils;
 
 namespace YiWuLian.Server.Core.NoticeTypes.SmsNoticeType;
 

@@ -54,5 +54,5 @@ public class SmsConfigModel
     /// <summary>
     /// 设备断开通知目标
     /// </summary>
-    public string DeviceDisconnectNoticeTarget { get; set; }
+    public string DeviceDisconnectNoticeTarget { get; set; } = "";
 }

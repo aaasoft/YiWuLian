@@ -1,9 +1,7 @@
 ﻿using Quick.Protocol;
 using Quick.Protocol.Pipeline;
-using System;
-using System.Collections.Generic;
+using Quick.Utils;
 using YiQiDong.Agent;
-using YiQiDong.Core.Utils;
 
 namespace YiWuLian.Server.Core.Interfaces.Core
 {

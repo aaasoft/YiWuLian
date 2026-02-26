@@ -8,7 +8,7 @@ using MudBlazor.Translations;
 using Quick.EntityFrameworkCore.Plus;
 using YiQiDong.Agent;
 using YiQiDong.Core;
-using YiQiDong.Core.Utils;
+using Quick.Utils;
 
 namespace YiWuLian.Server;
 

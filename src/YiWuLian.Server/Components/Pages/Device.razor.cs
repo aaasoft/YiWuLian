@@ -2,7 +2,7 @@ using YiWuLian.Server.Models;
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
 using Quick.EntityFrameworkCore.Plus;
-using YiQiDong.Core.Utils;
+using Quick.Utils;
 
 namespace YiWuLian.Server.Components.Pages;
 

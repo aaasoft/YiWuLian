@@ -1,7 +1,7 @@
 ﻿using Quick.Protocol;
 using Quick.Protocol.WebSocket.Server.AspNetCore;
+using Quick.Utils;
 using YiQiDong.Agent;
-using YiQiDong.Core.Utils;
 
 namespace YiWuLian.Server.Core.Interfaces.Core
 {
