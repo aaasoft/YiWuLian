@@ -13,12 +13,6 @@ public class Config : ModelJsonConfig<ConfigModel>
     public override string Name => "配置";
     public override int ExecuteTimeout => 5 * 60 * 1000;
 
-    private const string TAB_WEB = nameof(TAB_WEB);
-    private const string TAB_APP_DB = nameof(TAB_APP_DB);
-    private const string TAB_LOG_DB = nameof(TAB_LOG_DB);
-    private const string TAB_LICENSE = nameof(TAB_LICENSE);
-    private const string BTN_CHECK_LICENSE = nameof(BTN_CHECK_LICENSE);
-
     public Config()
      : base(
         ConfigModelSerializerContext.Default2.ConfigModel,
@@ -50,7 +44,6 @@ public class Config : ModelJsonConfig<ConfigModel>
 
         return new FieldForGet()
         {
-            Id = TAB_WEB,
             Type = FieldType.ContainerGroup,
             Name = "WEB配置",
             Children =
@@ -100,9 +93,14 @@ public class Config : ModelJsonConfig<ConfigModel>
         if (request != null)
         {
             //准备FieldIds
-            if (request.IsFieldIdsMatch(TAB_APP_DB, nameof(Model.AppDbConfig)))
+            if (request.IsFieldIdsMatch(nameof(Model.AppDbConfig)))
             {
                 appDbConfigRequest.FieldIds = request.FieldIds.Skip(2).ToArray();
+            }
+            else
+            {
+                //设置FieldIds不为null，代表是Post请求
+                appDbConfigRequest.FieldIds = [];
             }
             var otherChildren = request.GetField(nameof(Model.AppDbConfig)).Children;
             if (otherChildren != null)
@@ -160,7 +158,6 @@ public class Config : ModelJsonConfig<ConfigModel>
         ]);
         return new FieldForGet()
         {
-            Id = TAB_APP_DB,
             Type = FieldType.ContainerGroup,
             Name = "数据库连接",
             Children = list.ToArray()

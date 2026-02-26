@@ -2,6 +2,9 @@ using System;
 
 namespace YlIotProtocol.V1.Models;
 
+/// <summary>
+/// 通知类型信息
+/// </summary>
 public class NoticeTypeInfo
 {
     /// <summary>

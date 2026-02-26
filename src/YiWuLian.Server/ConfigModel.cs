@@ -71,4 +71,8 @@ public class ConfigModel
     /// </summary>
     [JsonConverter(typeof(JsonInt32Converter))]
     public int DeviceInterfaceTcpListenPort { get; set; } = 10067;
+    /// <summary>
+    /// 短信配置
+    /// </summary>
+    public Core.NoticeTypes.SmsNoticeType.SmsConfigModel SmsConfig { get; set; } = new();
 }
