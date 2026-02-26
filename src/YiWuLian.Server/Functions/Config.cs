@@ -5,6 +5,7 @@ using YiQiDong.Agent;
 using YiQiDong.Core.Functions;
 using YiQiDong.Protocol.V1.Model;
 using System.Text.Json;
+using YiWuLian.Server.Models;
 
 namespace YiWuLian.Server.Functions;
 
@@ -29,6 +30,7 @@ public class Config : ModelJsonConfig<ConfigModel>
     {
         var config = base.ReadConfig();
         appConfigHandler = DbUtils.AppDbUtils.GetDbContextConfigHandler(config.AppDbType, config.AppDbConfig);
+        appConfigHandler.GetModelsJsonSerializerContextFunc = t => ModelsJsonSerializerContext.Default2;
         return config;
     }
 
@@ -110,6 +112,7 @@ public class Config : ModelJsonConfig<ConfigModel>
         }
         appDbConfigRequest.Fields = appDbConfigRequestFieldList.ToArray();
         appConfigHandler = DbUtils.AppDbUtils.GetDbContextConfigHandler(model.AppDbType);
+        appConfigHandler.GetModelsJsonSerializerContextFunc = t => ModelsJsonSerializerContext.Default2;
         var list = new List<FieldForGet>
             {
                 new ()
