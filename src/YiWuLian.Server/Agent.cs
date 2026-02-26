@@ -38,6 +38,7 @@ public class Agent : AbstractAgent
         //初始化模型加载逻辑
         ConfigDbContext.ModelBuilderHandler = ConfigDbContextProxy.OnModelCreating;
 
+        AddFunction(new Functions.Test());
         AddFunction(new Functions.DbInfoView(() => new ConfigDbContext()));
         AddFunction(new Functions.Config());
 
