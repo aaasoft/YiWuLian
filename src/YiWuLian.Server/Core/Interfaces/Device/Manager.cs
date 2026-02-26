@@ -5,6 +5,7 @@ using Quick.EntityFrameworkCore.Plus;
 using Quick.Protocol.Utils;
 using YiWuLian.Server.Models;
 using Quick.EntityFrameworkCore.Plus.Utils;
+using YiWuLian.Server.Core.NoticeTypes;
 
 namespace YiWuLian.Server.Core.Interfaces.Device
 {
@@ -142,11 +143,23 @@ namespace YiWuLian.Server.Core.Interfaces.Device
                     ConnectedDevices = connectedDeviceDict.Values.ToArray();
                 }
                 channel.Disconnected -= handler;
-                AgentContext.LogInfo($"[设备接口][{channel.ChannelName}]{device}已经断开连接。本次连接流量: 发送[{storageUnitStringConverting.GetString(channel.BytesSent, 1, true)}B],接收[{storageUnitStringConverting.GetString(channel.BytesReceived, 1, true)}B]");
+                NoticeTypeManager.Instance.SaveConnectionLog(new()
+                {
+                    DeviceId = device.Id,
+                    DeviceName = device.Name,
+                    Content = $"已断开，通道：{channel.ChannelName}，本次连接流量: 发送[{storageUnitStringConverting.GetString(channel.BytesSent, 1, true)}B],接收[{storageUnitStringConverting.GetString(channel.BytesReceived, 1, true)}B]。",
+                    Time = DateTime.Now
+                });
             };
             channel.Disconnected += handler;
             channel.AddCommandExecuterManager(commandExecuterManager);
-            AgentContext.LogInfo($"[设备接口][{channel.ChannelName}]{device}已经注册。");
+            NoticeTypeManager.Instance.SaveConnectionLog(new()
+            {
+                DeviceId = device.Id,
+                DeviceName = device.Name,
+                Content = $"已连接，通道：{channel.ChannelName}。",
+                Time = DateTime.Now
+            });
             return new YlIotProtocol.V1.Commands.Register.Response();
         }
 

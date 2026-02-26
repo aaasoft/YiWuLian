@@ -5,12 +5,12 @@ using Quick.EntityFrameworkCore.Plus;
 
 namespace YiWuLian.Server.Components.Pages;
 
-public partial class NoticeLog : ComponentBase, IDisposable
+public partial class ConnectionLog : ComponentBase, IDisposable
 {
     [Parameter]
     public string DeviceId { get; set; }
 
-    private IEnumerable<YIS_NoticeLog> Elements;
+    private IEnumerable<YIS_ConnectionLog> Elements;
     private ConfigDbContext dbContext;
 
     protected override void OnInitialized()
@@ -26,9 +26,9 @@ public partial class NoticeLog : ComponentBase, IDisposable
     private void Refresh()
     {
         if (string.IsNullOrEmpty(DeviceId))
-            Elements = dbContext.Set<YIS_NoticeLog>().OrderByDescending(t=>t.Time);
+            Elements = dbContext.Set<YIS_ConnectionLog>().OrderByDescending(t=>t.Time);
         else
-            Elements = dbContext.Set<YIS_NoticeLog>().Where(t => t.DeviceId == DeviceId).OrderByDescending(t=>t.Time);
+            Elements = dbContext.Set<YIS_ConnectionLog>().Where(t => t.DeviceId == DeviceId).OrderByDescending(t=>t.Time);
     }
 
     public void Dispose()

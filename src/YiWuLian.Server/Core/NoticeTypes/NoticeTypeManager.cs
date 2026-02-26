@@ -43,11 +43,28 @@ public class NoticeTypeManager
         noticeTypeDict = null;
     }
 
+    /// <summary>
+    /// 保存通知日志
+    /// </summary>
+    /// <param name="noticeLog"></param>
     public void SaveNoticeLog(Models.YIS_NoticeLog noticeLog)
     {
         using (var dbContext = new ConfigDbContext())
         {
             dbContext.Add(noticeLog);
+            dbContext.SaveChanges();
+        }
+    }
+
+    /// <summary>
+    /// 保存连接日志
+    /// </summary>
+    /// <param name="systemLog"></param>
+    public void SaveConnectionLog(Models.YIS_ConnectionLog systemLog)
+    {
+        using (var dbContext = new ConfigDbContext())
+        {
+            dbContext.Add(systemLog);
             dbContext.SaveChanges();
         }
     }

@@ -7,10 +7,10 @@ using YiQiDong.Core.JsonConverters;
 
 namespace YiWuLian.Server.Models;
 
-[Table(nameof(YIS_NoticeLog))]
+[Table(nameof(YIS_ConnectionLog))]
 [MySqlCharSet(DbConsts.MYSQL_DEFAULT_CHARSET)]
-[Comment("通知日志")]
-public class YIS_NoticeLog
+[Comment("连接日志")]
+public class YIS_ConnectionLog
 {
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -24,12 +24,6 @@ public class YIS_NoticeLog
     [JsonConverter(typeof(JsonNullableDateTimeConverter))]
     [Comment("时间")]
     public DateTime? Time { get; set; }
-    [Comment("通知类型")]
-    public string NoticeType { get; set; }
-    [Comment("通知对象")]
-    public string NoticeTarget { get; set; }
-    [Comment("通知内容")]
-    public string NoticeContent { get; set; }
-    [Comment("通知结果")]
-    public string NoticeResult { get; set; }
+    [Comment("内容")]
+    public string Content { get; set; }
 }
