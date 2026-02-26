@@ -26,6 +26,11 @@ public class ConfigModel
     /// 配置密码
     /// </summary>
     public string Password { get; set; } = "123456";
+    /// <summary>
+    /// 设备断开通知持续分钟数
+    /// </summary>
+    [JsonConverter(typeof(JsonInt32Converter))]
+    public int DeviceDisconnectNoticeDurationMinutes { get; set; } = 1;
 
     /// <summary>
     /// 数据库类型

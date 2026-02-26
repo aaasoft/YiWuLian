@@ -124,12 +124,8 @@ namespace YiWuLian.Server.Core.Interfaces.Device
                 Thread.Sleep(100);
             }
             //准备新连接
-            lock (disconnectNoticeCtsDict)
-            {
-                if (disconnectNoticeCtsDict.Remove(device.Id, out var cts))
-                    cts.Cancel();
-                disconnectNoticeCtsDict[device.Id] = new();
-            }
+            var deviceDisconnectCancellationToken = clearOldDisconnectNoticeCts(device.Id,true);
+
             var deviceConnectionInfo = new DeviceConnectionInfo()
             {
                 Device = device,
@@ -160,18 +156,16 @@ namespace YiWuLian.Server.Core.Interfaces.Device
                     Content = $"已断开，通道：{channel.ChannelName}，连接持续时间：{DateTime.Now - deviceConnectionInfo.ConnectTime}，本次连接流量: 发送[{storageUnitStringConverting.GetString(channel.BytesSent, 1, true)}B],接收[{storageUnitStringConverting.GetString(channel.BytesReceived, 1, true)}B]",
                     Time = DateTime.Now
                 });
-                CancellationTokenSource disconnectNoticeCts = null;
-                lock (disconnectNoticeCtsDict)
-                    disconnectNoticeCtsDict.TryGetValue(device.Id, out disconnectNoticeCts);
-                if(disconnectNoticeCts!=null)
-                    Task.Delay(TimeSpan.FromMinutes(1), disconnectNoticeCts.Token).ContinueWith(t =>
+                if (Agent.Instance.Config.DeviceDisconnectNoticeDurationMinutes > 0)
+                {
+                    Task.Delay(TimeSpan.FromMinutes(Agent.Instance.Config.DeviceDisconnectNoticeDurationMinutes), deviceDisconnectCancellationToken).ContinueWith(t =>
                     {
-                        if(t.IsCanceled)
+                        if (t.IsCanceled)
                             return;
                         //如果配置了设备断开时通知，则进行通知
                         if (Agent.Instance.Config.SmsConfig.Enable && !string.IsNullOrEmpty(Agent.Instance.Config.SmsConfig.DeviceDisconnectNoticeTarget))
                         {
-                            var noticeType = NoticeTypeManager.Instance.Get("sms");
+                            var noticeType = NoticeTypeManager.Instance.Get<NoticeTypes.SmsNoticeType.NoticeType>();
                             noticeType.SendNotice(device, new()
                             {
                                 NoticeTypeId = noticeType.Id,
@@ -180,12 +174,14 @@ namespace YiWuLian.Server.Core.Interfaces.Device
                             });
                         }
                         //清除
-                        lock (disconnectNoticeCtsDict)
-                        {
-                            if (disconnectNoticeCtsDict.Remove(device.Id, out var cts))
-                                cts.Cancel();
-                        }
+                        clearOldDisconnectNoticeCts(device.Id);                            
                     });
+                }
+                else
+                {
+                    //清除
+                    clearOldDisconnectNoticeCts(device.Id);
+                }
             };
             channel.Disconnected += handler;
             channel.AddCommandExecuterManager(commandExecuterManager);
@@ -197,6 +193,21 @@ namespace YiWuLian.Server.Core.Interfaces.Device
                 Time = DateTime.Now
             });
             return new YlIotProtocol.V1.Commands.Register.Response();
+        }
+
+        private CancellationToken clearOldDisconnectNoticeCts(string deviceId, bool addNew = false)
+        {
+            lock (disconnectNoticeCtsDict)
+            {
+                if (disconnectNoticeCtsDict.Remove(deviceId, out var cts))
+                    cts.Cancel();
+                if (addNew)
+                {
+                    cts = new CancellationTokenSource();
+                    disconnectNoticeCtsDict[deviceId] = cts;
+                }
+                return cts.Token;
+            }
         }
 
         public void OnDeviceDeleted(string deviceId)

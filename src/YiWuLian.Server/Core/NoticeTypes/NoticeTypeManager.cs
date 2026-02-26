@@ -15,6 +15,13 @@ public class NoticeTypeManager
         return noticeType;
     }
 
+    public INoticeType Get<T>()
+        where T : INoticeType
+    {
+        var type = typeof(T);
+        return noticeTypeDict.Values.FirstOrDefault(t => t.GetType() == type);
+    }
+
     public void AddNoticeType(INoticeType noticeType)
     {
         noticeTypeDict[noticeType.Id] = noticeType;

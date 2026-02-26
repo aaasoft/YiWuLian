@@ -41,19 +41,19 @@ public class Config : ModelJsonConfig<ConfigModel>
         base.WriteConfig(model);
     }
 
-    protected FieldForGet getWebGroup(FunctionRequest request, ConfigModel requestModel, bool isReadOnly = false)
+    protected FieldForGet getBasicConfigGroup(FunctionRequest request, ConfigModel requestModel, bool isReadOnly = false)
     {
         var model = requestModel ?? Model;
 
         return new FieldForGet()
         {
             Type = FieldType.ContainerGroup,
-            Name = "WEB配置",
+            Name = "基础配置",
             Children =
             [
                 new()
                     {
-                        Id =  nameof(ConfigModel.Urls),
+                        Id =  nameof(model.Urls),
                         Name = "Web服务地址",
                         Description = null,
                         Input_AllowBlank = false,
@@ -64,14 +64,24 @@ public class Config : ModelJsonConfig<ConfigModel>
                     },
                     new()
                     {
-                        Id =  nameof(ConfigModel.Password),
+                        Id =  nameof(model.Password),
                         Name = "管理密码",
                         Description = "默认密码：123456",
                         Input_AllowBlank = false,
                         Type =  FieldType.InputText,
                         Value = model.Password,
                         Input_ReadOnly = isReadOnly
-                    }
+                    },
+                    new()
+                    {
+                        Id =  nameof(model.DeviceDisconnectNoticeDurationMinutes),
+                        Name = "设备断开通知持续分钟数",
+                        Description = null,
+                        Input_AllowBlank = false,
+                        Type =  FieldType.InputNumber,
+                        Value = model.DeviceDisconnectNoticeDurationMinutes.ToString(),
+                        Input_ReadOnly = isReadOnly
+                    },
             ]
         };
     }
@@ -389,16 +399,6 @@ public class Config : ModelJsonConfig<ConfigModel>
                 },
                 new()
                 {
-                    Id =  nameof(model.SmsConfig.DeviceDisconnectNoticeDurationMinutes),
-                    Name = "设备断开通知持续分钟数",
-                    Description = null,
-                    Input_AllowBlank = false,
-                    Type =  FieldType.InputNumber,
-                    Value = model.SmsConfig.DeviceDisconnectNoticeDurationMinutes.ToString(),
-                    Input_ReadOnly = isReadOnly
-                },
-                new()
-                {
                     Id =  nameof(model.SmsConfig.DeviceDisconnectNoticeTarget),
                     Name = "设备断开通知目标",
                     Description = "如果为空，则不通知",
@@ -420,7 +420,7 @@ public class Config : ModelJsonConfig<ConfigModel>
                     Type = FieldType.ContainerTab,
                     Children =
                     [
-                        getWebGroup(request,requestModel,isReadOnly),
+                        getBasicConfigGroup(request,requestModel,isReadOnly),
                         getAppDbGroup(request,requestModel,isReadOnly),
                         getDeviceInterfaceGroup(request,requestModel,isReadOnly),
                         getSmsServiceGroup(request,requestModel,isReadOnly)
