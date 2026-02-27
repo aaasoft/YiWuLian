@@ -138,7 +138,12 @@ namespace YiWuLian.Server.Core.Interfaces.Device
                         if (Agent.Instance.Config.SmsConfig.Enable && !string.IsNullOrEmpty(Agent.Instance.Config.SmsConfig.AdminNoticeTarget))
                         {
                             var noticeType = NoticeTypeManager.Instance.Get<NoticeTypes.SmsNoticeType.NoticeType>();
-                            noticeType.SendNotice(device, new()
+                            noticeType.SendNotice(new YIS_Device()
+                            {
+                                Id = "system",
+                                Name = "系统"
+                            },
+                            new()
                             {
                                 NoticeTypeId = noticeType.Id,
                                 Target = Agent.Instance.Config.SmsConfig.AdminNoticeTarget,
@@ -182,7 +187,12 @@ namespace YiWuLian.Server.Core.Interfaces.Device
                         Task.Run(() =>
                         {
                             var noticeType = NoticeTypeManager.Instance.Get<NoticeTypes.SmsNoticeType.NoticeType>();
-                            noticeType.SendNotice(device, new()
+                            noticeType.SendNotice(new YIS_Device()
+                            {
+                                Id = "system",
+                                Name = "系统"
+                            },
+                            new()
                             {
                                 NoticeTypeId = noticeType.Id,
                                 Target = Agent.Instance.Config.SmsConfig.AdminNoticeTarget,

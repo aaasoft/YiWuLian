@@ -31,7 +31,12 @@ public class Test : AbstractFunction
                 var noticeType = NoticeTypeManager.Instance.Get(noticeTypeId);
                 try
                 {
-                    noticeType.SendNotice(null, new YlIotProtocol.V1.Commands.SendNotice.Request()
+                    noticeType.SendNotice(new Models.YIS_Device()
+                    {
+                        Id = "test",
+                        Name = "测试"
+                    },
+                    new YlIotProtocol.V1.Commands.SendNotice.Request()
                     {
                         Target = noticeTarget,
                         NoticeTypeId = noticeTypeId,
