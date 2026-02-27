@@ -41,6 +41,7 @@ namespace YiWuLian.Server.Core.Interfaces.Device
             foreach (var device in devices)
             {
                 var connectionInfo = device.ConnectionInfo;
+                connectionInfo.RenewConnectCancellationToken();
                 if (connectionInfo.IsConnected)
                     connectionInfo.Channel?.Disconnect();
             }
@@ -230,6 +231,7 @@ namespace YiWuLian.Server.Core.Interfaces.Device
         public void OnDeviceDeleted(YIS_Device device)
         {
             device.ConnectionInfo.Channel?.Disconnect();
+            device.ConnectionInfo.RenewConnectCancellationToken();
         }
     }
 }
