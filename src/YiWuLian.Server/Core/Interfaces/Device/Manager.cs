@@ -117,13 +117,21 @@ namespace YiWuLian.Server.Core.Interfaces.Device
                 channel.Disconnected -= channelDisconnectHandler;
                 channel.Disconnect();
                 deviceConnectionInfo.SetConnected(false);
-                var connectuartion = deviceConnectionInfo.DisconnectTime - deviceConnectionInfo.ConnectTime;
-                AgentContext.LogDebug($"{device}已断开，通道：{channel.ChannelName}，连接持续时间：{connectuartion}，本次连接流量: 发送[{storageUnitStringConverting.GetString(channel.BytesSent, 2, true)}B],接收[{storageUnitStringConverting.GetString(channel.BytesReceived, 2, true)}B]");
+                //流量信息
+                var dataUsageFullString = $"，使用流量: 发送[{storageUnitStringConverting.GetString(channel.BytesSent, 2, true)}B],接收[{storageUnitStringConverting.GetString(channel.BytesReceived, 2, true)}B]";
+                //连接持续时间
+                string connectDuartionFullString = null;
+                if(deviceConnectionInfo.DisconnectTime.HasValue && deviceConnectionInfo.ConnectTime.HasValue)
+                {
+                    var timespan = deviceConnectionInfo.DisconnectTime.Value - deviceConnectionInfo.ConnectTime.Value;
+                    connectDuartionFullString = $"，连接持续时间：{timespan:[-][d.]hh:mm:ss}";
+                }
+                AgentContext.LogDebug($"{device}已断开，通道：{channel.ChannelName}{connectDuartionFullString}{dataUsageFullString}");
                 NoticeTypeManager.Instance.SaveConnectionLog(new()
                 {
                     DeviceId = device.Id,
                     DeviceName = device.Name,
-                    Content = $"已断开，通道：{channel.ChannelName}，连接持续时间：{connectuartion}，本次连接流量: 发送[{storageUnitStringConverting.GetString(channel.BytesSent, 2, true)}B],接收[{storageUnitStringConverting.GetString(channel.BytesReceived, 2, true)}B]",
+                    Content = $"已断开，通道：{channel.ChannelName}{connectDuartionFullString}{dataUsageFullString}",
                     Time = DateTime.Now
                 });
                 //断开通知
@@ -147,7 +155,7 @@ namespace YiWuLian.Server.Core.Interfaces.Device
                             {
                                 NoticeTypeId = noticeType.Id,
                                 Target = Agent.Instance.Config.SmsConfig.AdminNoticeTarget,
-                                Content = $"{device}已断开，连接持续时间：{connectuartion}"
+                                Content = $"{deviceConnectionInfo.DisconnectTime.Value:yyyy-MM-dd HH:mm:ss}，{device}已断开{connectDuartionFullString}"
                             });
                         }
                     });
@@ -164,8 +172,8 @@ namespace YiWuLian.Server.Core.Interfaces.Device
             string disconnectDuartionFullString = null;
             if (deviceConnectionInfo.ConnectTime.HasValue && deviceConnectionInfo.DisconnectTime.HasValue)
             {
-                disconnectDuartion = deviceConnectionInfo.ConnectTime - deviceConnectionInfo.DisconnectTime;
-                disconnectDuartionFullString = $"，断开持续时间：{disconnectDuartion}";
+                disconnectDuartion = deviceConnectionInfo.ConnectTime.Value - deviceConnectionInfo.DisconnectTime.Value;
+                disconnectDuartionFullString = $"，断开持续时间：{disconnectDuartion.Value:[-][d.]hh:mm:ss}";
             }
 
             AgentContext.LogDebug($"{device}已连接，通道：{channel.ChannelName}{clientProgramFullString}{disconnectDuartionFullString}");
@@ -196,7 +204,7 @@ namespace YiWuLian.Server.Core.Interfaces.Device
                             {
                                 NoticeTypeId = noticeType.Id,
                                 Target = Agent.Instance.Config.SmsConfig.AdminNoticeTarget,
-                                Content = $"{device}已连接{disconnectDuartionFullString}"
+                                Content = $"{deviceConnectionInfo.ConnectTime.Value:yyyy-MM-dd HH:mm:ss}，{device}已连接{disconnectDuartionFullString}"
                             });
                         });
                     }
