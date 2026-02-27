@@ -86,6 +86,11 @@ namespace YiWuLian.Server.Core.Interfaces.Device
             return new();
         }
 
+        private string GetTimeSpanString(TimeSpan timespan)
+        {
+            return new TimeSpan(timespan.Days, timespan.Hours, timespan.Minutes, timespan.Seconds).ToString();
+        }
+
         private YlIotProtocol.V1.Commands.Register.Response ExecuteRegister(QpChannel channel, YlIotProtocol.V1.Commands.Register.Request request)
         {
             try
@@ -127,8 +132,7 @@ namespace YiWuLian.Server.Core.Interfaces.Device
                     if (deviceConnectionInfo.DisconnectTime.HasValue && deviceConnectionInfo.ConnectTime.HasValue)
                     {
                         var timespan = deviceConnectionInfo.DisconnectTime.Value - deviceConnectionInfo.ConnectTime.Value;
-                        timespan = timespan.Add(TimeSpan.FromMilliseconds(0 - timespan.Milliseconds));
-                        connectDuartionFullString = $"，连接持续时间：{timespan}";
+                        connectDuartionFullString = $"，连接持续时间：{GetTimeSpanString(timespan)}";
                     }
                     AgentContext.LogDebug($"{device}已断开，通道：{channel.ChannelName}{connectDuartionFullString}{dataUsageFullString}");
                     NoticeTypeManager.Instance.SaveConnectionLog(new()
@@ -143,8 +147,7 @@ namespace YiWuLian.Server.Core.Interfaces.Device
                     {
                         Task.Delay(TimeSpan.FromMinutes(disconnectionDuartionMinutes), deviceConnectCancellationToken).ContinueWith(t =>
                         {
-                            AgentContext.LogInfo($"{device}断开延时检测：deviceConnectionInfo.ConnectTime:{deviceConnectionInfo.ConnectTime},t.IsCanceled->{t.IsCanceled},deviceConnectCancellationToken.IsCancellationRequested:{deviceConnectCancellationToken.IsCancellationRequested}");
-                            if (t.IsCanceled || deviceConnectCancellationToken.IsCancellationRequested)
+                            if (t.IsCanceled)
                                 return;
                             //短信通知
                             if (Agent.Instance.Config.SmsConfig.Enable && !string.IsNullOrEmpty(Agent.Instance.Config.SmsConfig.AdminNoticeTarget))
@@ -178,8 +181,7 @@ namespace YiWuLian.Server.Core.Interfaces.Device
                 {
                     disconnectDuartion = deviceConnectionInfo.ConnectTime.Value - deviceConnectionInfo.DisconnectTime.Value;
                     var timespan = disconnectDuartion.Value;
-                    timespan=timespan.Add(TimeSpan.FromMilliseconds(0-timespan.Milliseconds));
-                    disconnectDuartionFullString = $"，断开持续时间：{timespan}";
+                    disconnectDuartionFullString = $"，断开持续时间：{GetTimeSpanString(timespan)}";
                 }
 
                 AgentContext.LogDebug($"{device}已连接，通道：{channel.ChannelName}{clientProgramFullString}{disconnectDuartionFullString}");
