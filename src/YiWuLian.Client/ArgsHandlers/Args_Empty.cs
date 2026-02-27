@@ -93,7 +93,7 @@ namespace YiWuLian.Client.ArgsHandlers
 
             ConsoleUtils.ConsoleWriteLine("服务通讯端口", ConsoleColor.Green);
             Console.WriteLine("说明：一般不用修改，除非端口被占用");
-            Console.WriteLine($"当前值：{Program.Config.ConnectUrl}");
+            Console.WriteLine($"当前值：{Program.Config.ServiceListenPort}");
             ConsoleUtils.ConsoleWrite(">", ConsoleColor.Green);
             line = Console.ReadLine();
             if (!string.IsNullOrEmpty(line))
