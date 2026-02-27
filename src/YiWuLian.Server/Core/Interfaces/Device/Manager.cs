@@ -6,6 +6,7 @@ using YiWuLian.Server.Models;
 using YiWuLian.Server.Core.NoticeTypes;
 using Quick.Utils;
 using YiQiDong.Agent;
+using Blazored.LocalStorage.JsonConverters;
 
 namespace YiWuLian.Server.Core.Interfaces.Device
 {
@@ -87,130 +88,141 @@ namespace YiWuLian.Server.Core.Interfaces.Device
 
         private YlIotProtocol.V1.Commands.Register.Response ExecuteRegister(QpChannel channel, YlIotProtocol.V1.Commands.Register.Request request)
         {
-            var deviceId = request.DeviceId;
-            YIS_Device device;            
-            device = ConfigDbContext.CacheContext.Find(new YIS_Device(deviceId));
-            if (device == null)
-                throw new ApplicationException($"未找到编号为[{deviceId}]的设备");
-            var correctAnswer = CryptographyUtils.ComputeMD5Hash(deviceId + channel.AuthenticateQuestion + device.ICCID);
-            if (correctAnswer != request.AuthAnswer)
-                throw new ApplicationException($"认证失败");
-            var deviceConnectionInfo = device.ConnectionInfo;
-            //重新生成连接取消令牌
-            deviceConnectionInfo.RenewConnectCancellationToken();
-            var deviceConnectCancellationToken = deviceConnectionInfo.ConnectCancellationToken;
+            try
+            {
+                var deviceId = request.DeviceId;
+                YIS_Device device;
+                device = ConfigDbContext.CacheContext.Find(new YIS_Device(deviceId));
+                if (device == null)
+                    throw new ApplicationException($"未找到编号为[{deviceId}]的设备");
+                var correctAnswer = CryptographyUtils.ComputeMD5Hash(deviceId + channel.AuthenticateQuestion + device.ICCID);
+                if (correctAnswer != request.AuthAnswer)
+                    throw new ApplicationException($"认证失败");
+                var deviceConnectionInfo = device.ConnectionInfo;
+                //重新生成连接取消令牌
+                deviceConnectionInfo.RenewConnectCancellationToken();
+                var deviceConnectCancellationToken = deviceConnectionInfo.ConnectCancellationToken;
 
-            //如果此设备已经有连接，则断开之前的连接
-            if (deviceConnectionInfo.IsConnected)
-            {
-                deviceConnectionInfo.Channel?.Disconnect();
-                Thread.Sleep(100);
-            }
-            //更新连接信息
-            deviceConnectionInfo.ClientProgram = request.ClientProgram;
-            deviceConnectionInfo.Channel = channel;
-            deviceConnectionInfo.SetConnected(true);
-            channel.Tag = device;
-            EventHandler channelDisconnectHandler = null;
-            channelDisconnectHandler = (sender, e) =>
-            {
-                channel.Disconnected -= channelDisconnectHandler;
-                channel.Disconnect();
-                deviceConnectionInfo.SetConnected(false);
-                //流量信息
-                var dataUsageFullString = $"，使用流量: 发送[{storageUnitStringConverting.GetString(channel.BytesSent, 2, true)}B],接收[{storageUnitStringConverting.GetString(channel.BytesReceived, 2, true)}B]";
-                //连接持续时间
-                string connectDuartionFullString = null;
-                if(deviceConnectionInfo.DisconnectTime.HasValue && deviceConnectionInfo.ConnectTime.HasValue)
+                //如果此设备已经有连接，则断开之前的连接
+                if (deviceConnectionInfo.IsConnected)
                 {
-                    var timespan = deviceConnectionInfo.DisconnectTime.Value - deviceConnectionInfo.ConnectTime.Value;
-                    connectDuartionFullString = $"，连接持续时间：{timespan:[-][d.]hh:mm:ss}";
+                    deviceConnectionInfo.Channel?.Disconnect();
+                    Thread.Sleep(100);
                 }
-                AgentContext.LogDebug($"{device}已断开，通道：{channel.ChannelName}{connectDuartionFullString}{dataUsageFullString}");
+                //更新连接信息
+                deviceConnectionInfo.ClientProgram = request.ClientProgram;
+                deviceConnectionInfo.Channel = channel;
+                deviceConnectionInfo.SetConnected(true);
+                channel.Tag = device;
+                EventHandler channelDisconnectHandler = null;
+                channelDisconnectHandler = (sender, e) =>
+                {
+                    channel.Disconnected -= channelDisconnectHandler;
+                    channel.Disconnect();
+                    deviceConnectionInfo.SetConnected(false);
+                    //流量信息
+                    var dataUsageFullString = $"，使用流量: 发送[{storageUnitStringConverting.GetString(channel.BytesSent, 2, true)}B],接收[{storageUnitStringConverting.GetString(channel.BytesReceived, 2, true)}B]";
+                    //连接持续时间
+                    string connectDuartionFullString = null;
+                    if (deviceConnectionInfo.DisconnectTime.HasValue && deviceConnectionInfo.ConnectTime.HasValue)
+                    {
+                        var timespan = deviceConnectionInfo.DisconnectTime.Value - deviceConnectionInfo.ConnectTime.Value;
+                        timespan = timespan.Add(TimeSpan.FromMilliseconds(0 - timespan.Milliseconds));
+                        connectDuartionFullString = $"，连接持续时间：{timespan}";
+                    }
+                    AgentContext.LogDebug($"{device}已断开，通道：{channel.ChannelName}{connectDuartionFullString}{dataUsageFullString}");
+                    NoticeTypeManager.Instance.SaveConnectionLog(new()
+                    {
+                        DeviceId = device.Id,
+                        DeviceName = device.Name,
+                        Content = $"已断开，通道：{channel.ChannelName}{connectDuartionFullString}{dataUsageFullString}",
+                        Time = DateTime.Now
+                    });
+                    //断开通知
+                    if (disconnectionDuartionMinutes > 0)
+                    {
+                        Task.Delay(TimeSpan.FromMinutes(disconnectionDuartionMinutes), deviceConnectCancellationToken).ContinueWith(t =>
+                        {
+                            AgentContext.LogInfo($"{device}断开延时检测：deviceConnectionInfo.ConnectTime:{deviceConnectionInfo.ConnectTime},t.IsCanceled->{t.IsCanceled},deviceConnectCancellationToken.IsCancellationRequested:{deviceConnectCancellationToken.IsCancellationRequested}");
+                            if (t.IsCanceled || deviceConnectCancellationToken.IsCancellationRequested)
+                                return;
+                            //短信通知
+                            if (Agent.Instance.Config.SmsConfig.Enable && !string.IsNullOrEmpty(Agent.Instance.Config.SmsConfig.AdminNoticeTarget))
+                            {
+                                var noticeType = NoticeTypeManager.Instance.Get<NoticeTypes.SmsNoticeType.NoticeType>();
+                                noticeType.SendNotice(new YIS_Device()
+                                {
+                                    Id = "system",
+                                    Name = "系统"
+                                },
+                                new()
+                                {
+                                    NoticeTypeId = noticeType.Id,
+                                    Target = Agent.Instance.Config.SmsConfig.AdminNoticeTarget,
+                                    Content = $"{deviceConnectionInfo.DisconnectTime.Value:yyyy-MM-dd HH:mm:ss}，{device}已断开{connectDuartionFullString}"
+                                });
+                            }
+                        });
+                    }
+                };
+                channel.Disconnected += channelDisconnectHandler;
+                channel.AddCommandExecuterManager(commandExecuterManager);
+                //客户端
+                string clientProgramFullString = null;
+                if (!string.IsNullOrEmpty(request.ClientProgram))
+                    clientProgramFullString = $"，客户端：{request.ClientProgram}";
+                //断开持续时间
+                TimeSpan? disconnectDuartion = null;
+                string disconnectDuartionFullString = null;
+                if (deviceConnectionInfo.ConnectTime.HasValue && deviceConnectionInfo.DisconnectTime.HasValue)
+                {
+                    disconnectDuartion = deviceConnectionInfo.ConnectTime.Value - deviceConnectionInfo.DisconnectTime.Value;
+                    var timespan = disconnectDuartion.Value;
+                    timespan=timespan.Add(TimeSpan.FromMilliseconds(0-timespan.Milliseconds));
+                    disconnectDuartionFullString = $"，断开持续时间：{timespan}";
+                }
+
+                AgentContext.LogDebug($"{device}已连接，通道：{channel.ChannelName}{clientProgramFullString}{disconnectDuartionFullString}");
                 NoticeTypeManager.Instance.SaveConnectionLog(new()
                 {
                     DeviceId = device.Id,
                     DeviceName = device.Name,
-                    Content = $"已断开，通道：{channel.ChannelName}{connectDuartionFullString}{dataUsageFullString}",
+                    Content = $"已连接，通道：{channel.ChannelName}{clientProgramFullString}{disconnectDuartionFullString}",
                     Time = DateTime.Now
                 });
-                //断开通知
-                if (disconnectionDuartionMinutes > 0)
+                //连接通知
+                if (disconnectionDuartionMinutes > 0 && disconnectDuartion.HasValue)
                 {
-                    Task.Delay(TimeSpan.FromMinutes(disconnectionDuartionMinutes), deviceConnectCancellationToken).ContinueWith(t =>
+                    if (disconnectDuartion.Value.TotalMinutes > disconnectionDuartionMinutes)
                     {
-                        AgentContext.LogInfo($"{device}断开延时检测：deviceConnectionInfo.ConnectTime:{deviceConnectionInfo.ConnectTime},t.IsCanceled->{t.IsCanceled},deviceConnectCancellationToken.IsCancellationRequested:{deviceConnectCancellationToken.IsCancellationRequested}");
-                        if (t.IsCanceled || deviceConnectCancellationToken.IsCancellationRequested)
-                            return;
                         //短信通知
                         if (Agent.Instance.Config.SmsConfig.Enable && !string.IsNullOrEmpty(Agent.Instance.Config.SmsConfig.AdminNoticeTarget))
                         {
-                            var noticeType = NoticeTypeManager.Instance.Get<NoticeTypes.SmsNoticeType.NoticeType>();
-                            noticeType.SendNotice(new YIS_Device()
+                            Task.Run(() =>
                             {
-                                Id = "system",
-                                Name = "系统"
-                            },
-                            new()
-                            {
-                                NoticeTypeId = noticeType.Id,
-                                Target = Agent.Instance.Config.SmsConfig.AdminNoticeTarget,
-                                Content = $"{deviceConnectionInfo.DisconnectTime.Value:yyyy-MM-dd HH:mm:ss}，{device}已断开{connectDuartionFullString}"
+                                var noticeType = NoticeTypeManager.Instance.Get<NoticeTypes.SmsNoticeType.NoticeType>();
+                                noticeType.SendNotice(new YIS_Device()
+                                {
+                                    Id = "system",
+                                    Name = "系统"
+                                },
+                                new()
+                                {
+                                    NoticeTypeId = noticeType.Id,
+                                    Target = Agent.Instance.Config.SmsConfig.AdminNoticeTarget,
+                                    Content = $"{deviceConnectionInfo.ConnectTime.Value:yyyy-MM-dd HH:mm:ss}，{device}已连接{disconnectDuartionFullString}"
+                                });
                             });
                         }
-                    });
-                }
-            };
-            channel.Disconnected += channelDisconnectHandler;
-            channel.AddCommandExecuterManager(commandExecuterManager);
-            //客户端
-            string clientProgramFullString = null;
-            if (!string.IsNullOrEmpty(request.ClientProgram))
-                clientProgramFullString = $"，客户端：{request.ClientProgram}";
-            //断开持续时间
-            TimeSpan? disconnectDuartion = null;
-            string disconnectDuartionFullString = null;
-            if (deviceConnectionInfo.ConnectTime.HasValue && deviceConnectionInfo.DisconnectTime.HasValue)
-            {
-                disconnectDuartion = deviceConnectionInfo.ConnectTime.Value - deviceConnectionInfo.DisconnectTime.Value;
-                disconnectDuartionFullString = $"，断开持续时间：{disconnectDuartion.Value:[-][d.]hh:mm:ss}";
-            }
-
-            AgentContext.LogDebug($"{device}已连接，通道：{channel.ChannelName}{clientProgramFullString}{disconnectDuartionFullString}");
-            NoticeTypeManager.Instance.SaveConnectionLog(new()
-            {
-                DeviceId = device.Id,
-                DeviceName = device.Name,
-                Content = $"已连接，通道：{channel.ChannelName}{clientProgramFullString}{disconnectDuartionFullString}",
-                Time = DateTime.Now
-            });
-            //连接通知
-            if (disconnectionDuartionMinutes > 0 && disconnectDuartion.HasValue)
-            {
-                if (disconnectDuartion.Value.TotalMinutes > disconnectionDuartionMinutes)
-                {
-                    //短信通知
-                    if (Agent.Instance.Config.SmsConfig.Enable && !string.IsNullOrEmpty(Agent.Instance.Config.SmsConfig.AdminNoticeTarget))
-                    {
-                        Task.Run(() =>
-                        {
-                            var noticeType = NoticeTypeManager.Instance.Get<NoticeTypes.SmsNoticeType.NoticeType>();
-                            noticeType.SendNotice(new YIS_Device()
-                            {
-                                Id = "system",
-                                Name = "系统"
-                            },
-                            new()
-                            {
-                                NoticeTypeId = noticeType.Id,
-                                Target = Agent.Instance.Config.SmsConfig.AdminNoticeTarget,
-                                Content = $"{deviceConnectionInfo.ConnectTime.Value:yyyy-MM-dd HH:mm:ss}，{device}已连接{disconnectDuartionFullString}"
-                            });
-                        });
                     }
                 }
+                return new YlIotProtocol.V1.Commands.Register.Response();
             }
-            return new YlIotProtocol.V1.Commands.Register.Response();
+            catch (Exception ex)
+            {
+                AgentContext.LogError(ExceptionUtils.GetExceptionString(ex));
+                throw;
+            }
         }
 
         public void OnDeviceDeleted(YIS_Device device)

@@ -1,4 +1,5 @@
 <Solution>
+  <Project Path="YiWuLian.Client/YiWuLian.Client.csproj" />
   <Project Path="YiWuLian.Protocol/YiWuLian.Protocol.csproj" />
   <Project Path="YiWuLian.Server/YiWuLian.Server.csproj" />
   <Project Path="_build/_build.csproj" />
