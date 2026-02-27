@@ -30,7 +30,7 @@ public class ConfigModel
     /// 设备断开通知持续分钟数
     /// </summary>
     [JsonConverter(typeof(JsonInt32Converter))]
-    public int DeviceDisconnectNoticeDurationMinutes { get; set; } = 1;
+    public int NoticeConnectionChangedDurationMinutes { get; set; } = 1;
 
     /// <summary>
     /// 数据库类型
@@ -43,41 +43,21 @@ public class ConfigModel
     {
         ["DataSource"] = "YIS.db"
     };
-
     /// <summary>
-    /// 设备接口密码
+    /// 设备服务配置
     /// </summary>
-    public string DeviceInterfacePassword { get; set; } = "123456";
+    public Core.Interfaces.Core.AllInterfaceConfig DeviceServiceConfig { get; set; } = new()
+    {
+        Password = "123456",
+        WebSocketEnable = false,
+        PipeEnable = false,
+        PipeName = $"{nameof(Server)}.ClientInterface",
+        TcpEnable = true,
+        TcpListenAddress = "0.0.0.0",
+        TcpListenPort = 10067
+    };
     /// <summary>
-    /// 设备接口是否启用WebSocket
-    /// </summary>
-    [JsonConverter(typeof(JsonBoolConverter))]
-    public bool DeviceInterfaceWebSocketEnable { get; set; } = false;
-    /// <summary>
-    /// 设备接口是否启用管道
-    /// </summary>
-    [JsonConverter(typeof(JsonBoolConverter))]
-    public bool DeviceInterfacePipeEnable { get; set; } = true;
-    /// <summary>
-    /// 设备接口管道名称
-    /// </summary>
-    public string DeviceInterfacePipeName { get; set; } = $"{nameof(YiWuLian.Server)}.ClientInterface";
-    /// <summary>
-    /// 设备接口是否启用TCP
-    /// </summary>
-    [JsonConverter(typeof(JsonBoolConverter))]
-    public bool DeviceInterfaceTcpEnable { get; set; } = false;
-    /// <summary>
-    /// 设备接口TCP监听地址
-    /// </summary>
-    public string DeviceInterfaceTcpListenAddress { get; set; } = "0.0.0.0";
-    /// <summary>
-    /// 设备接口TCP监听端口
-    /// </summary>
-    [JsonConverter(typeof(JsonInt32Converter))]
-    public int DeviceInterfaceTcpListenPort { get; set; } = 10067;
-    /// <summary>
-    /// 短信配置
+    /// 短信服务配置
     /// </summary>
     public Core.NoticeTypes.SmsNoticeType.SmsConfigModel SmsConfig { get; set; } = new();
 }

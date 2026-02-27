@@ -1,12 +1,12 @@
 using Microsoft.AspNetCore.Components;
-using Quick.Protocol;
-using YiWuLian.Server.Core.Interfaces.Device;
+using Quick.EntityFrameworkCore.Plus;
+using YiWuLian.Server.Models;
 
 namespace YiWuLian.Server.Components.Pages;
 
 public partial class DeviceConnection : ComponentBase, IDisposable
 {
-    private IEnumerable<DeviceConnectionInfo> Elements;
+    private IEnumerable<YIS_Device> Elements;
 
     private Timer timer;
 
@@ -18,7 +18,8 @@ public partial class DeviceConnection : ComponentBase, IDisposable
 
     private void refresh(object _)
     {
-        Elements = Manager.Instance.ConnectedDevices;
+        Elements = ConfigDbContext.CacheContext.Query<YIS_Device>()
+            .OrderByDescending(t => t.ConnectionInfo.IsConnected);
         InvokeAsync(StateHasChanged);
     }
 

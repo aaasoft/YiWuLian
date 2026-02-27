@@ -15,7 +15,7 @@
         <PropertyColumn Property="x => x.Id" Title="IMEI" />
         <PropertyColumn Property="x => x.SimIMSI" Title="IMSI" />
         <PropertyColumn Property="x => x.SimEnableDate" Title="启用日期" Format="yyyy-MM-dd" />
-        <PropertyColumn Property="x => Core.Interfaces.Device.Manager.Instance.GetDeviceConnectStatus(x.Id)" Filterable="false" Sortable="false" Title="连接状态" />
+        <PropertyColumn Property="x => x.ConnectionInfo.GetDeviceConnectStatus()" Filterable="false" Sortable="false" Title="连接状态" />
         <TemplateColumn>
             <CellTemplate>
                 <MudStack Row>

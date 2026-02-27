@@ -1,4 +1,3 @@
-using System;
 using Microsoft.AspNetCore.Components;
 using Quick.EntityFrameworkCore.Plus;
 using YiWuLian.Server.Core.Interfaces.Device;
@@ -7,16 +6,7 @@ namespace YiWuLian.Server.Components.Pages;
 
 public partial class Home : ComponentBase
 {
-    private int GetDevicesCount()
-    {
-        using (var dbContext = new ConfigDbContext())
-        {
-            return dbContext.Set<Models.YIS_Device>().Count();
-        }
-    }
+    private int GetDevicesCount() => ConfigDbContext.CacheContext.Query<Models.YIS_Device>().Length;
 
-    private int GetConnectionCount()
-    {
-        return Manager.Instance.ConnectedDevices.Length;
-    }
+    private int GetConnectionCount() => ConfigDbContext.CacheContext.Query<Models.YIS_Device>(t => t.ConnectionInfo.IsConnected).Length;
 }

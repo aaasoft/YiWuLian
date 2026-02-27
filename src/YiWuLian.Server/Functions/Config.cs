@@ -74,12 +74,12 @@ public class Config : ModelJsonConfig<ConfigModel>
                     },
                     new()
                     {
-                        Id =  nameof(model.DeviceDisconnectNoticeDurationMinutes),
-                        Name = "设备断开通知持续分钟数",
+                        Id =  nameof(model.NoticeConnectionChangedDurationMinutes),
+                        Name = "通知连接变化持续分钟数",
                         Description = null,
                         Input_AllowBlank = false,
                         Type =  FieldType.InputNumber,
-                        Value = model.DeviceDisconnectNoticeDurationMinutes.ToString(),
+                        Value = model.NoticeConnectionChangedDurationMinutes.ToString(),
                         Input_ReadOnly = isReadOnly
                     },
             ]
@@ -178,34 +178,36 @@ public class Config : ModelJsonConfig<ConfigModel>
         };
     }
 
-    protected FieldForGet getDeviceInterfaceGroup(FunctionRequest request, ConfigModel requestModel, bool isReadOnly = false)
+    protected FieldForGet getDeviceServiceGroup(FunctionRequest request, ConfigModel requestModel, bool isReadOnly = false)
     {
         var model = requestModel ?? Model;
         return new FieldForGet()
         {
+            Id = nameof(model.DeviceServiceConfig),
             Type = FieldType.ContainerGroup,
             Name = "设备服务",
             Children =
             [
                 new()
                 {
-                    Id = nameof(ConfigModel.DeviceInterfacePassword),
+                    Id = nameof(model.DeviceServiceConfig.Password),
                     Name = "密码",
                     Description = "默认密码：123456",
                     Input_AllowBlank = false,
                     Type = FieldType.InputText,
-                    Value = model.DeviceInterfacePassword,
+                    Value = model.DeviceServiceConfig.Password,
                     Input_ReadOnly = isReadOnly
                 },
                 new ()
                 {
                     Name = "管道",
                     Type = FieldType.ContainerGroup,
+                    MarginBottom = 1,
                     Children =
                     [
                         new()
                         {
-                            Id = nameof(ConfigModel.DeviceInterfacePipeEnable),
+                            Id = nameof(model.DeviceServiceConfig.PipeEnable),
                             Name = "启用",
                             Description = "接口地址示例：qp.pipe://./YiWuLian.Server.ClientInterface",
                             Input_AllowBlank = false,
@@ -216,16 +218,16 @@ public class Config : ModelJsonConfig<ConfigModel>
                                 [false.ToString()] = "否"
                             },
                             PostOnChanged = true,
-                            Value = model.DeviceInterfacePipeEnable.ToString(),
+                            Value = model.DeviceServiceConfig.PipeEnable.ToString(),
                             Input_ReadOnly = isReadOnly
                         },
                         new()
                         {
-                            Id = nameof(ConfigModel.DeviceInterfacePipeName),
+                            Id = nameof(model.DeviceServiceConfig.PipeName),
                             Name = "管道名称",
                             Input_AllowBlank = false,
-                            Type = model.DeviceInterfacePipeEnable ? FieldType.InputText: FieldType.InputHidden,
-                            Value = model.DeviceInterfacePipeName,
+                            Type = model.DeviceServiceConfig.PipeEnable ? FieldType.InputText: FieldType.InputHidden,
+                            Value = model.DeviceServiceConfig.PipeName,
                             Input_ReadOnly = isReadOnly
                         },
                     ]
@@ -234,13 +236,14 @@ public class Config : ModelJsonConfig<ConfigModel>
                 {
                     Name = "WebSocket",
                     Type = FieldType.ContainerGroup,
+                    MarginBottom = 1,
                     Children =
                     [
                         new()
                         {
-                            Id = nameof(ConfigModel.DeviceInterfaceWebSocketEnable),
+                            Id = nameof(model.DeviceServiceConfig.WebSocketEnable),
                             Name = "启用",
-                            Description = "接口地址示例：qp.ws://127.0.0.1:8097/ws/client",
+                            Description = "接口地址示例：qp.ws://127.0.0.1:8097/ws/device",
                             Input_AllowBlank = false,
                             Type = FieldType.InputSelect,
                             InputSelect_Options = new Dictionary<string,string>()
@@ -249,7 +252,7 @@ public class Config : ModelJsonConfig<ConfigModel>
                                 [false.ToString()] = "否"
                             },
                             PostOnChanged = true,
-                            Value = model.DeviceInterfaceWebSocketEnable.ToString(),
+                            Value = model.DeviceServiceConfig.WebSocketEnable.ToString(),
                             Input_ReadOnly = isReadOnly
                         }      
                     ]
@@ -258,11 +261,12 @@ public class Config : ModelJsonConfig<ConfigModel>
                 {
                     Name = "TCP",
                     Type = FieldType.ContainerGroup,
+                    MarginBottom = 1,
                     Children =
                     [
                         new()
                         {
-                            Id = nameof(ConfigModel.DeviceInterfaceTcpEnable),
+                            Id = nameof(model.DeviceServiceConfig.TcpEnable),
                             Name = "启用",
                             Description = "接口地址示例：qp.tcp://127.0.0.1:8097",
                             Input_AllowBlank = false,
@@ -273,25 +277,25 @@ public class Config : ModelJsonConfig<ConfigModel>
                                 [false.ToString()] = "否"
                             },
                             PostOnChanged = true,
-                            Value = model.DeviceInterfaceTcpEnable.ToString(),
+                            Value = model.DeviceServiceConfig.TcpEnable.ToString(),
                             Input_ReadOnly = isReadOnly
                         },
                         new()
                         {
-                            Id = nameof(ConfigModel.DeviceInterfaceTcpListenAddress),
+                            Id = nameof(model.DeviceServiceConfig.TcpListenAddress),
                             Name = "监听地址",
                             Input_AllowBlank = false,
-                            Type = model.DeviceInterfaceTcpEnable ? FieldType.InputText: FieldType.InputHidden,
-                            Value = model.DeviceInterfaceTcpListenAddress,
+                            Type = model.DeviceServiceConfig.TcpEnable ? FieldType.InputText: FieldType.InputHidden,
+                            Value = model.DeviceServiceConfig.TcpListenAddress,
                             Input_ReadOnly = isReadOnly
                         },
                         new()
                         {
-                            Id = nameof(ConfigModel.DeviceInterfaceTcpListenPort),
+                            Id = nameof(model.DeviceServiceConfig.TcpListenPort),
                             Name = "监听端口",
                             Input_AllowBlank = false,
-                            Type = model.DeviceInterfaceTcpEnable ? FieldType.InputText: FieldType.InputHidden,
-                            Value = model.DeviceInterfaceTcpListenPort.ToString(),
+                            Type = model.DeviceServiceConfig.TcpEnable ? FieldType.InputText: FieldType.InputHidden,
+                            Value = model.DeviceServiceConfig.TcpListenPort.ToString(),
                             Input_ReadOnly = isReadOnly
                         }
                     ]
@@ -399,12 +403,12 @@ public class Config : ModelJsonConfig<ConfigModel>
                 },
                 new()
                 {
-                    Id =  nameof(model.SmsConfig.DeviceDisconnectNoticeTarget),
-                    Name = "设备断开通知目标",
+                    Id =  nameof(model.SmsConfig.AdminNoticeTarget),
+                    Name = "管理员通知目标",
                     Description = "如果为空，则不通知",
                     Input_AllowBlank = false,
                     Type =  FieldType.InputText,
-                    Value = model.SmsConfig.DeviceDisconnectNoticeTarget,
+                    Value = model.SmsConfig.AdminNoticeTarget,
                     Input_ReadOnly = isReadOnly
                 }
             ]
@@ -422,7 +426,7 @@ public class Config : ModelJsonConfig<ConfigModel>
                     [
                         getBasicConfigGroup(request,requestModel,isReadOnly),
                         getAppDbGroup(request,requestModel,isReadOnly),
-                        getDeviceInterfaceGroup(request,requestModel,isReadOnly),
+                        getDeviceServiceGroup(request,requestModel,isReadOnly),
                         getSmsServiceGroup(request,requestModel,isReadOnly)
                     ]
                 }

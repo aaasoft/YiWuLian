@@ -59,6 +59,8 @@ public class Agent : AbstractAgent
 
             AgentContext.LogInfo("确保数据库创建和更新...");
             ConfigDbContext.ConfigHandler.DatabaseEnsureCreatedAndUpdated(() => new ConfigDbContext());
+            ConfigDbContext.CacheContext.SetDoNotCacheTypes(typeof(YIS_ConnectionLog),typeof(YIS_NoticeLog));
+            ConfigDbContext.CacheContext.LoadCache();
             AgentContext.LogInfo("数据库连接初始化完成.");
         }
         catch (Exception ex)

@@ -6,17 +6,15 @@ using Quick.Utils;
 
 namespace YiWuLian.Server.Components.Pages;
 
-public partial class Device : ComponentBase, IDisposable
+public partial class Device : ComponentBase
 {
     [Inject]
     public IDialogService DialogService { get; set; }
 
     private IEnumerable<YIS_Device> Elements;
-    private ConfigDbContext dbContextForQuery;
 
     protected override void OnInitialized()
     {
-        dbContextForQuery = new();
         Refresh();
     }
 
@@ -37,15 +35,10 @@ public partial class Device : ComponentBase, IDisposable
             var model = (YIS_Device)result.Data;
             try
             {
-                using (var dbContext = new ConfigDbContext())
-                {
-                    var existedModel = dbContext.Find<YIS_Device>(model.Id);
-                    if (existedModel != null)
-                        throw new ArgumentException($"已经存在{existedModel}");
-                    dbContext.Add(model);
-                    dbContext.SaveChanges();
-                }
-
+                var existedModel = ConfigDbContext.CacheContext.Find(new YIS_Device(model.Id));
+                if (existedModel != null)
+                    throw new ArgumentException($"已经存在{existedModel}");
+                ConfigDbContext.CacheContext.Add(model);
                 Refresh();
                 await InvokeAsync(StateHasChanged);
                 break;
@@ -63,9 +56,8 @@ public partial class Device : ComponentBase, IDisposable
 
     private void Refresh()
     {
-        Elements = dbContextForQuery.Set<YIS_Device>()
-            .ToArray()
-            .OrderBy(t => Core.Interfaces.Device.Manager.Instance.GetDeviceConnectStatus(t.Id));
+        Elements = ConfigDbContext.CacheContext.Query<YIS_Device>()
+            .OrderBy(t => t.ConnectionInfo.IsConnected);
     }
 
     private async Task ShowLogs(YIS_Device model)
@@ -106,11 +98,8 @@ public partial class Device : ComponentBase, IDisposable
             model.SimEnableDate = edited_model.SimEnableDate;
             try
             {
-                using (var dbContext = new ConfigDbContext())
-                {
-                    dbContext.Update(edited_model);
-                    dbContext.SaveChanges();
-                }
+                ConfigDbContext.CacheContext.Update(edited_model);
+                Core.Interfaces.Device.Manager.Instance.OnDeviceDeleted(model);
                 await InvokeAsync(StateHasChanged);
             }
             catch (Exception ex)
@@ -137,12 +126,8 @@ public partial class Device : ComponentBase, IDisposable
         {
             try
             {
-                using (var dbContext = new ConfigDbContext())
-                {
-                    dbContext.Remove(model);
-                    dbContext.SaveChanges();
-                }
-                Core.Interfaces.Device.Manager.Instance.OnDeviceDeleted(model.Id);
+                ConfigDbContext.CacheContext.Remove(model);
+                Core.Interfaces.Device.Manager.Instance.OnDeviceDeleted(model);
                 Refresh();
                 await InvokeAsync(StateHasChanged);
             }
@@ -155,10 +140,5 @@ public partial class Device : ComponentBase, IDisposable
                 });
             }
         }
-    }
-
-    public void Dispose()
-    {
-        dbContextForQuery.Dispose();
     }
 }

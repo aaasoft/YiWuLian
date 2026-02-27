@@ -35,6 +35,12 @@ public class YIS_Device : BaseModel
     [Comment("SIM卡启用日期")]
     [JsonConverter(typeof(JsonNullableDateTimeConverter))]
     public DateTime? SimEnableDate { get; set; }
+    /// <summary>
+    /// 连接信息
+    /// </summary>
+    [NotMapped]
+    [JsonIgnore]
+    public DeviceConnectionInfo ConnectionInfo { get; } = new();
 
     public override string ToString()
     {

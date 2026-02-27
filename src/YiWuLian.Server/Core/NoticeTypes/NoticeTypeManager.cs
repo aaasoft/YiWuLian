@@ -32,13 +32,10 @@ public class NoticeTypeManager
         noticeTypeDict = new();
         AddNoticeType(new SmsNoticeType.NoticeType());
 
-        using (var dbContext = new ConfigDbContext())
+        foreach (var noticeType in noticeTypeDict.Values)
         {
-            foreach (var noticeType in noticeTypeDict.Values)
-            {
-                if (noticeType.Enable)
-                    noticeType.Start();
-            }
+            if (noticeType.Enable)
+                noticeType.Start();
         }
     }
 
