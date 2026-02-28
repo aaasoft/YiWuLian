@@ -14,6 +14,7 @@ partial class ConfigModelSerializerContext : JsonSerializerContext
 {
     public static ConfigModelSerializerContext Default2 { get; } = new ConfigModelSerializerContext(new JsonSerializerOptions()
     {
+        WriteIndented = true,
         Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
     });
 }
