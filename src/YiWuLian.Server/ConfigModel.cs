@@ -2,6 +2,8 @@
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
+using Quick.EntityFrameworkCore.Plus;
+using Quick.Protocol.InterfaceService;
 using YiQiDong.Core.JsonConverters;
 
 namespace YiWuLian.Server;
@@ -18,6 +20,8 @@ partial class ConfigModelSerializerContext : JsonSerializerContext
 
 public class ConfigModel
 {
+    public static ConfigModel Default { get; } = new();
+
     /// <summary>
     /// Web服务地址
     /// </summary>
@@ -33,23 +37,29 @@ public class ConfigModel
     public int NoticeConnectionChangedDurationMinutes { get; set; } = 1;
 
     /// <summary>
-    /// 数据库类型
+    /// 应用数据库
     /// </summary>
-    public string AppDbType { get; set; } = "Quick.EntityFrameworkCore.Plus.SQLite.SQLiteDbContextConfigHandler";
-    /// <summary>
-    /// 数据库配置
-    /// </summary>
-    public JsonNode AppDbConfig { get; set; } = new JsonObject()
+    public DbConfigInfo AppDb { get; set; } = new()
     {
-        ["DataSource"] = "YIS.db"
+#if DEBUG
+        DbType = "Quick.EntityFrameworkCore.Plus.SQLite.SQLiteDbContextConfigHandler",
+        DbConnectionParameter = new JsonObject()
+        {
+            ["DataSource"] = "YIS.db"
+        }
+#else
+            DbType = "Quick.EntityFrameworkCore.Plus.MySql.MySqlDbContextConfigHandler",
+#endif
     };
+
     /// <summary>
     /// 设备服务配置
     /// </summary>
-    public Core.Interfaces.Core.AllInterfaceConfig DeviceServiceConfig { get; set; } = new()
+    public QpInterfaceServiceConfig DeviceServiceConfig { get; set; } = new()
     {
         Password = "123456",
         WebSocketEnable = false,
+        WebSocketPath = "/ws/device",
         PipeEnable = false,
         PipeName = $"{nameof(Server)}.ClientInterface",
         TcpEnable = true,

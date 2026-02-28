@@ -2,7 +2,6 @@ using System.Text;
 using Blazored.LocalStorage;
 using YiWuLian.Server.Components;
 using YiWuLian.Server.Models;
-using YiWuLian.Server.Utils;
 using MudBlazor.Services;
 using MudBlazor.Translations;
 using Quick.EntityFrameworkCore.Plus;
@@ -33,8 +32,10 @@ public class Agent : AbstractAgent
         Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
         //初始化计算引擎
         //CalcEngine.Init();
-        //初始化数据库辅助类
-        DbUtils.Init();
+        //使用的数据库类型：MySQL
+            DbUtils.Init(
+                Quick.EntityFrameworkCore.Plus.MySql.MySqlDbContextConfigHandler.Info
+            );
         //初始化模型加载逻辑
         ConfigDbContext.ModelBuilderHandler = ConfigDbContextProxy.OnModelCreating;
 
@@ -43,8 +44,7 @@ public class Agent : AbstractAgent
         AddFunction(new Functions.Config());
 
         Config = Functions.Config.Instance.ReadConfig();
-
-        ConfigDbContext.ConfigHandler = DbUtils.AppDbUtils.GetDbContextConfigHandler(Config.AppDbType, Config.AppDbConfig);
+        ConfigDbContext.ConfigHandler = DbUtils.GetDbContextConfigHandler(Config.AppDb.DbType, t => ModelsJsonSerializerContext.Default2, Config.AppDb.DbConnectionParameter);
     }
 
     public override void Start()
@@ -55,7 +55,7 @@ public class Agent : AbstractAgent
         try
         {
             //初始化数据库连接
-            ConfigDbContext.ConfigHandler = DbUtils.AppDbUtils.GetDbContextConfigHandler(Config.AppDbType, Config.AppDbConfig);
+            ConfigDbContext.ConfigHandler = DbUtils.GetDbContextConfigHandler(Config.AppDb.DbType, t => ModelsJsonSerializerContext.Default2, Config.AppDb.DbConnectionParameter);
 
             AgentContext.LogInfo("确保数据库创建和更新...");
             ConfigDbContext.ConfigHandler.DatabaseEnsureCreatedAndUpdated(() => new ConfigDbContext());
@@ -112,7 +112,7 @@ public class Agent : AbstractAgent
             app.MapStaticAssets();
             app.MapRazorComponents<App>()
                 .AddInteractiveServerRenderMode();
-            Core.Interfaces.Device.Manager.Instance.Init(app, Config);
+            Core.Interfaces.Device.Manager.Instance.Start(app, Config);
             app.Start();
             AgentContext.LogInfo("Web服务启动完成，URL：" + Config.Urls);
         }
@@ -120,8 +120,6 @@ public class Agent : AbstractAgent
         {
             AgentContext.LogWarn($"启动Web服务时出错，原因：{ExceptionUtils.GetExceptionMessage(ex)}");
         }
-        //启动设备接口
-        Core.Interfaces.Device.Manager.Instance.Start();
     }
 
     public override void Stop()

@@ -29,15 +29,14 @@ public class Config : ModelJsonConfig<ConfigModel>
     public override ConfigModel ReadConfig()
     {
         var config = base.ReadConfig();
-        appConfigHandler = DbUtils.AppDbUtils.GetDbContextConfigHandler(config.AppDbType, config.AppDbConfig);
-        appConfigHandler.GetModelsJsonSerializerContextFunc = t => ModelsJsonSerializerContext.Default2;
+        appConfigHandler = DbUtils.GetDbContextConfigHandler(config.AppDb.DbType, t => ModelsJsonSerializerContext.Default2, config.AppDb.DbConnectionParameter);
         return config;
     }
 
     public override void WriteConfig(ConfigModel model)
     {
         if (appConfigHandler != null)
-            model.AppDbConfig = DbUtils.AppDbUtils.SerializerConfigHandler(appConfigHandler);
+            model.AppDb.DbConnectionParameter = DbUtils.SerializerConfigHandler(appConfigHandler);
         base.WriteConfig(model);
     }
 
@@ -86,225 +85,6 @@ public class Config : ModelJsonConfig<ConfigModel>
         };
     }
 
-    protected FieldForGet getAppDbGroup(FunctionRequest request, ConfigModel requestModel, bool isReadOnly = false)
-    {
-        var model = requestModel ?? Model;
-        var appDbConfigRequest = new FieldsForPostContainer();
-        //准备Children
-        var appDbConfigRequestFieldList = new List<FieldForPost>();
-        if (isReadOnly)
-        {
-            appDbConfigRequestFieldList.Add
-            (
-                new()
-                {
-                    Id = AbstractDbContextConfigHandler.Quick_EntityFrameworkCore_Plus_AbstractDbContextConfigHandler_IsReadOnly,
-                    Value = isReadOnly.ToString()
-                }
-            );
-        }
-        if (request != null)
-        {
-            var prefixFieldIds = new string[] { nameof(Model.AppDbConfig) };
-            //准备FieldIds
-            if (request.IsFieldIdsMatch(prefixFieldIds))
-            {
-                appDbConfigRequest.FieldIds = request.FieldIds.Skip(prefixFieldIds.Length).ToArray();
-            }
-            else
-            {
-                //设置FieldIds不为null，代表是Post请求
-                appDbConfigRequest.FieldIds = [];
-            }
-            var otherChildren = request.GetField(nameof(Model.AppDbConfig)).Children;
-            if (otherChildren != null)
-                appDbConfigRequestFieldList.AddRange(otherChildren);
-        }
-        appDbConfigRequest.Fields = appDbConfigRequestFieldList.ToArray();
-        appConfigHandler = DbUtils.AppDbUtils.GetDbContextConfigHandler(model.AppDbType);
-        appConfigHandler.GetModelsJsonSerializerContextFunc = t => ModelsJsonSerializerContext.Default2;
-        var list = new List<FieldForGet>
-            {
-                new ()
-                {
-                    Id=nameof(Model.AppDbType),
-                    Name="数据库类型",
-                    Type= FieldType.InputSelect,
-                    InputSelect_Options = DbUtils.AppDbUtils.GetDbTypeDict(),
-                    PostOnChanged=true,
-                    Value = model.AppDbType,
-                    Input_ReadOnly = isReadOnly
-                }
-            };
-        if (model.AppDbType == "Quick.EntityFrameworkCore.Plus.SQLite.SQLiteDbContextConfigHandler")
-        {
-            list.Add(new()
-            {
-                Name = "警告",
-                Input_AllowBlank = false,
-                Type = FieldType.Alert,
-                Theme = FieldTheme.Danger,
-                Description = "一般只在开发和调试的情况下使用SQLite数据库，生产环境建议使用其他数据库！",
-                Input_ReadOnly = isReadOnly
-            });
-        }
-        list.AddRange(
-        [
-            new ()
-            {
-                Id=nameof(Model.AppDbConfig),
-                Type = FieldType.ContainerRow,
-                Children=
-                [
-                    new ()
-                    {
-                        Type = FieldType.HtmlDiv,
-                        ColumnWidth = 0,
-                        Children =  appConfigHandler.QuickFields_Request(appDbConfigRequest)
-                    }
-                ]
-            },
-            new FieldForGet()
-            {
-                Type = FieldType.ContainerRow,
-                Margin = 1
-            }
-        ]);
-        return new FieldForGet()
-        {
-            Type = FieldType.ContainerGroup,
-            Name = "数据库连接",
-            Children = list.ToArray()
-        };
-    }
-
-    protected FieldForGet getDeviceServiceGroup(FunctionRequest request, ConfigModel requestModel, bool isReadOnly = false)
-    {
-        var model = requestModel ?? Model;
-        return new FieldForGet()
-        {
-            Id = nameof(model.DeviceServiceConfig),
-            Type = FieldType.ContainerGroup,
-            Name = "设备服务",
-            Children =
-            [
-                new()
-                {
-                    Id = nameof(model.DeviceServiceConfig.Password),
-                    Name = "密码",
-                    Description = "默认密码：123456",
-                    Input_AllowBlank = false,
-                    Type = FieldType.InputText,
-                    Value = model.DeviceServiceConfig.Password,
-                    Input_ReadOnly = isReadOnly
-                },
-                new ()
-                {
-                    Name = "管道",
-                    Type = FieldType.ContainerGroup,
-                    MarginBottom = 1,
-                    Children =
-                    [
-                        new()
-                        {
-                            Id = nameof(model.DeviceServiceConfig.PipeEnable),
-                            Name = "启用",
-                            Description = "接口地址示例：qp.pipe://./YiWuLian.Server.ClientInterface",
-                            Input_AllowBlank = false,
-                            Type = FieldType.InputSelect,
-                            InputSelect_Options = new Dictionary<string,string>()
-                            {
-                                [true.ToString()] = "是",
-                                [false.ToString()] = "否"
-                            },
-                            PostOnChanged = true,
-                            Value = model.DeviceServiceConfig.PipeEnable.ToString(),
-                            Input_ReadOnly = isReadOnly
-                        },
-                        new()
-                        {
-                            Id = nameof(model.DeviceServiceConfig.PipeName),
-                            Name = "管道名称",
-                            Input_AllowBlank = false,
-                            Type = model.DeviceServiceConfig.PipeEnable ? FieldType.InputText: FieldType.InputHidden,
-                            Value = model.DeviceServiceConfig.PipeName,
-                            Input_ReadOnly = isReadOnly
-                        },
-                    ]
-                },
-                new ()
-                {
-                    Name = "WebSocket",
-                    Type = FieldType.ContainerGroup,
-                    MarginBottom = 1,
-                    Children =
-                    [
-                        new()
-                        {
-                            Id = nameof(model.DeviceServiceConfig.WebSocketEnable),
-                            Name = "启用",
-                            Description = "接口地址示例：qp.ws://127.0.0.1:8097/ws/device",
-                            Input_AllowBlank = false,
-                            Type = FieldType.InputSelect,
-                            InputSelect_Options = new Dictionary<string,string>()
-                            {
-                                [true.ToString()] = "是",
-                                [false.ToString()] = "否"
-                            },
-                            PostOnChanged = true,
-                            Value = model.DeviceServiceConfig.WebSocketEnable.ToString(),
-                            Input_ReadOnly = isReadOnly
-                        }      
-                    ]
-                },
-                new ()
-                {
-                    Name = "TCP",
-                    Type = FieldType.ContainerGroup,
-                    MarginBottom = 1,
-                    Children =
-                    [
-                        new()
-                        {
-                            Id = nameof(model.DeviceServiceConfig.TcpEnable),
-                            Name = "启用",
-                            Description = "接口地址示例：qp.tcp://127.0.0.1:8097",
-                            Input_AllowBlank = false,
-                            Type = FieldType.InputSelect,
-                            InputSelect_Options = new Dictionary<string,string>()
-                            {
-                                [true.ToString()] = "是",
-                                [false.ToString()] = "否"
-                            },
-                            PostOnChanged = true,
-                            Value = model.DeviceServiceConfig.TcpEnable.ToString(),
-                            Input_ReadOnly = isReadOnly
-                        },
-                        new()
-                        {
-                            Id = nameof(model.DeviceServiceConfig.TcpListenAddress),
-                            Name = "监听地址",
-                            Input_AllowBlank = false,
-                            Type = model.DeviceServiceConfig.TcpEnable ? FieldType.InputText: FieldType.InputHidden,
-                            Value = model.DeviceServiceConfig.TcpListenAddress,
-                            Input_ReadOnly = isReadOnly
-                        },
-                        new()
-                        {
-                            Id = nameof(model.DeviceServiceConfig.TcpListenPort),
-                            Name = "监听端口",
-                            Input_AllowBlank = false,
-                            Type = model.DeviceServiceConfig.TcpEnable ? FieldType.InputText: FieldType.InputHidden,
-                            Value = model.DeviceServiceConfig.TcpListenPort.ToString(),
-                            Input_ReadOnly = isReadOnly
-                        }
-                    ]
-                }
-            ]
-        };
-    }
-
-    
     protected FieldForGet getSmsServiceGroup(FunctionRequest request, ConfigModel requestModel, bool isReadOnly = false)
     {
         var model = requestModel ?? Model;
@@ -417,6 +197,8 @@ public class Config : ModelJsonConfig<ConfigModel>
 
     protected override List<FieldForGet> innerGet(FunctionRequest request, ConfigModel requestModel, bool isReadOnly = false)
     {
+        var model = requestModel ?? Model;
+        var defaultModel = ConfigModel.Default;
         return new List<FieldForGet>()
             {
                 new FieldForGet()
@@ -425,8 +207,12 @@ public class Config : ModelJsonConfig<ConfigModel>
                     Children =
                     [
                         getBasicConfigGroup(request,requestModel,isReadOnly),
-                        getAppDbGroup(request,requestModel,isReadOnly),
-                        getDeviceServiceGroup(request,requestModel,isReadOnly),
+                        model.AppDb.GetDbConfigGroup(request,isReadOnly,nameof(ConfigModel.AppDb),"数据库",
+                            t=>new ConfigDbContext(t),
+                            t => ModelsJsonSerializerContext.Default2,
+                            ()=> appConfigHandler,
+                            t=>appConfigHandler=t),
+                        model.DeviceServiceConfig.GetConfigGroup(isReadOnly,nameof(model.DeviceServiceConfig),"设备服务", defaultModel.DeviceServiceConfig),
                         getSmsServiceGroup(request,requestModel,isReadOnly)
                     ]
                 }

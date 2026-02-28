@@ -1,12 +1,11 @@
 ﻿using Quick.Protocol;
-using YiWuLian.Server.Core.Interfaces.Core;
 using Quick.EntityFrameworkCore.Plus;
 using Quick.Protocol.Utils;
 using YiWuLian.Server.Models;
 using YiWuLian.Server.Core.NoticeTypes;
 using Quick.Utils;
 using YiQiDong.Agent;
-using Blazored.LocalStorage.JsonConverters;
+using Quick.Protocol.InterfaceService;
 
 namespace YiWuLian.Server.Core.Interfaces.Device
 {
@@ -14,24 +13,27 @@ namespace YiWuLian.Server.Core.Interfaces.Device
     {
         public static Manager Instance { get; } = new Manager();
 
-        private AllInterface allInterface;
-        private AllInterfaceConfig deviceServiceConfig;
+        private QpInterfaceServiceContext allInterface;
+        private QpInterfaceServiceConfig deviceServiceConfig;
         private UnitStringConverting storageUnitStringConverting = UnitStringConverting.StorageUnitStringConverting;
         private int disconnectionDuartionMinutes;
 
-        public void Init(IApplicationBuilder app, ConfigModel configModel)
+
+        public void Start(IApplicationBuilder app, ConfigModel configModel)
         {
             disconnectionDuartionMinutes = Agent.Instance.Config.NoticeConnectionChangedDurationMinutes;
             deviceServiceConfig = Agent.Instance.Config.DeviceServiceConfig;
-            deviceServiceConfig.InterfaceName = "设备接口";
-            deviceServiceConfig.InstructionSet = [YlIotProtocol.V1.Instruction.Instance];
-            deviceServiceConfig.WebSocketPath = "/ws/device";
-            allInterface = new AllInterface(deviceServiceConfig, app);
-        }
-
-        public void Start()
-        {
-            allInterface.Start(deviceServiceConfig, commandExecuterManagerForRegister, noticeHandlerManager);
+            allInterface = new QpInterfaceServiceContext(new ()
+            {
+                InterfaceName = "设备接口",
+                WebBuilder = app,
+                Config = deviceServiceConfig,
+                InstructionSet = [YlIotProtocol.V1.Instruction.Instance],
+                Logger = AgentContext.LogInfo,
+                CommandExecuterManager = commandExecuterManager,
+                NoticeHandlerManager = noticeHandlerManager
+            });
+            allInterface.Start();
         }
 
         public void Stop()
