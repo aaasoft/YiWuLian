@@ -30,7 +30,7 @@ namespace YiWuLian.Server.Core.Interfaces.Device
                 Config = deviceServiceConfig,
                 InstructionSet = [YlIotProtocol.V1.Instruction.Instance],
                 Logger = AgentContext.LogInfo,
-                CommandExecuterManager = commandExecuterManager,
+                CommandExecuterManager = commandExecuterManagerForRegister,
                 NoticeHandlerManager = noticeHandlerManager
             });
             allInterface.Start();
