@@ -23,6 +23,6 @@ public partial class LoginControl : ComponentBase
             MudDialog.Close(DialogResult.Ok((string)null));
             return;
         }
-        DialogService.ShowMessageBox("错误", "密码错误");
+        DialogService.ShowMessageBoxAsync("错误", "密码错误");
     }
 }

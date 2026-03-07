@@ -14,8 +14,8 @@
   <PackageReference Include="Quick.Shell" Version="1.0.4" />
   <PackageReference Include="Quick.Build" Version="1.0.20" />
   <PackageReference Include="System.ServiceProcess.ServiceController" Version="10.0.3" />
-  <PackageReference Include="Quick.Protocol.AllClients" Version="2.6.7" />
-  <PackageReference Include="Quick.Protocol.SerialPort" Version="2.6.7" />
+  <PackageReference Include="Quick.Protocol.AllClients" Version="2.6.8" />
+  <PackageReference Include="Quick.Protocol.SerialPort" Version="2.6.8" />
 </ItemGroup>
 <ItemGroup>
   <ProjectReference Include="..\YiWuLian.Protocol\YiWuLian.Protocol.csproj" />

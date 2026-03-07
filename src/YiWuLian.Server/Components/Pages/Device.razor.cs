@@ -45,7 +45,7 @@ public partial class Device : ComponentBase
             }
             catch (Exception ex)
             {
-                await DialogService.ShowMessageBox(new MessageBoxOptions()
+                await DialogService.ShowMessageBoxAsync(new MessageBoxOptions()
                 {
                     Title = "错误",
                     Message = $"添加{model}时出错，原因：" + ExceptionUtils.GetExceptionMessage(ex)
@@ -104,7 +104,7 @@ public partial class Device : ComponentBase
             }
             catch (Exception ex)
             {
-                await DialogService.ShowMessageBox(new MessageBoxOptions()
+                await DialogService.ShowMessageBoxAsync(new MessageBoxOptions()
                 {
                     Title = "错误",
                     Message = $"编辑{model}时出错，原因：" + ExceptionUtils.GetExceptionMessage(ex)
@@ -115,7 +115,7 @@ public partial class Device : ComponentBase
 
     private async Task Delete(YIS_Device model)
     {
-        var result = await DialogService.ShowMessageBox(new()
+        var result = await DialogService.ShowMessageBoxAsync(new()
         {
             Title = "删除确认",
             Message = $"将要删除{model}，确认要继续?",
@@ -133,7 +133,7 @@ public partial class Device : ComponentBase
             }
             catch (Exception ex)
             {
-                await DialogService.ShowMessageBox(new MessageBoxOptions()
+                await DialogService.ShowMessageBoxAsync(new MessageBoxOptions()
                 {
                     Title = "错误",
                     Message = $"删除{model}时出错，原因：" + ExceptionUtils.GetExceptionMessage(ex)

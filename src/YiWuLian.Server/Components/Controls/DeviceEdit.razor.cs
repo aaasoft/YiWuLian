@@ -19,32 +19,32 @@ public partial class DeviceEdit : ComponentBase
     {
         if (string.IsNullOrEmpty(Model.Id))
         {
-            DialogService.ShowMessageBox("错误", "请输入IMEI！");
+            DialogService.ShowMessageBoxAsync("错误", "请输入IMEI！");
             return;
         }
         if (string.IsNullOrEmpty(Model.Name))
         {
-            DialogService.ShowMessageBox("错误", "请输入设备名称！");
+            DialogService.ShowMessageBoxAsync("错误", "请输入设备名称！");
             return;
         }
         if (string.IsNullOrEmpty(Model.ICCID))
         {
-            DialogService.ShowMessageBox("错误", "请输入ICCID！");
+            DialogService.ShowMessageBoxAsync("错误", "请输入ICCID！");
             return;
         }
         if (string.IsNullOrEmpty(Model.SimIMSI))
         {
-            DialogService.ShowMessageBox("错误", "请输入IMSI！");
+            DialogService.ShowMessageBoxAsync("错误", "请输入IMSI！");
             return;
         }
         if (string.IsNullOrEmpty(Model.SimPuk))
         {
-            DialogService.ShowMessageBox("错误", "请输入PUK！");
+            DialogService.ShowMessageBoxAsync("错误", "请输入PUK！");
             return;
         }
         if (Model.SimEnableDate==null)
         {
-            DialogService.ShowMessageBox("错误", "请输入SIM卡启用日期！");
+            DialogService.ShowMessageBoxAsync("错误", "请输入SIM卡启用日期！");
             return;
         }
         MudDialog.Close(DialogResult.Ok(Model));

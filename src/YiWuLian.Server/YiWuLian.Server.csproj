@@ -15,14 +15,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="MudBlazor" Version="8.*" />
-    <PackageReference Include="MudBlazor.Translations" Version="2.7.0" />
+    <PackageReference Include="MudBlazor" Version="9.1.0" />
+    <PackageReference Include="MudBlazor.Translations" Version="3.1.0" />
     <PackageReference Include="Quick.EntityFrameworkCore.Plus.MySql" Version="2026.6.228" />
-    <PackageReference Include="Quick.Protocol.AllClients" Version="2.6.7" />
-    <PackageReference Include="Quick.Protocol.InterfaceService" Version="2.6.7.2" />
-    <PackageReference Include="Quick.Protocol.WebSocket.Server.AspNetCore" Version="2.6.7" />
+    <PackageReference Include="Quick.Protocol.AllClients" Version="2.6.8" />
+    <PackageReference Include="Quick.Protocol.InterfaceService" Version="2.6.8" />
+    <PackageReference Include="Quick.Protocol.WebSocket.Server.AspNetCore" Version="2.6.8" />
     <PackageReference Include="Quick.Sms.CMCC.CloudMAS" Version="1.0.8" />
-    <PackageReference Include="YiQiDong.Core" Version="2026.11.226" />
+    <PackageReference Include="YiQiDong.Core" Version="2026.12.307" />
     <PackageReference Include="Blazored.LocalStorage" Version="4.5.0" />
   </ItemGroup>
   

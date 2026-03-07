@@ -130,7 +130,7 @@ public partial class MainLayout : LayoutComponentBase
 
     private async Task Logout()
     {
-        var result = await DialogService.ShowMessageBox("退出", "是否要退出登录？");
+        var result = await DialogService.ShowMessageBoxAsync("退出", "是否要退出登录？");
         if (result == null || !result.Value)
             return;
         await LocalStorage.RemoveItemAsync(LoginTokenKey);
