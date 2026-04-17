@@ -19,8 +19,8 @@
     <PackageReference Include="MudBlazor.Translations" Version="3.3.0" />
     <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Quick.EntityFrameworkCore.Plus.SQLite" Version="2026.8.416" />
     <PackageReference Include="Quick.EntityFrameworkCore.Plus.MySql" Version="2026.8.416" />
-    <PackageReference Include="Quick.Protocol.InterfaceService" Version="2.6.9.2" />
-    <PackageReference Include="Quick.Protocol.WebSocket.Server.AspNetCore" Version="2.6.9" />
+    <PackageReference Include="Quick.Protocol.InterfaceService" Version="2.6.10" />
+    <PackageReference Include="Quick.Protocol.WebSocket.Server.AspNetCore" Version="2.6.10" />
     <PackageReference Include="Quick.Sms.CMCC.CloudMAS" Version="1.0.8" />
     <PackageReference Include="YiQiDong.Core" Version="2026.14.320" />
     <PackageReference Include="Blazored.LocalStorage" Version="4.5.0" />

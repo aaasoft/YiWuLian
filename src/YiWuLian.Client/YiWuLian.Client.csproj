@@ -14,11 +14,11 @@
   <PackageReference Include="Quick.Shell" Version="1.0.4" />
   <PackageReference Include="Quick.Build" Version="1.0.20" />
   <PackageReference Include="System.ServiceProcess.ServiceController" Version="10.0.6" />
-  <PackageReference Include="Quick.Protocol.Pipeline" Version="2.6.9" />
-  <PackageReference Include="Quick.Protocol.Tcp" Version="2.6.9" />  
-  <PackageReference Include="Quick.Protocol.WebSocket.Client" Version="2.6.9" />
-  <PackageReference Include="Quick.Protocol.Http.Client" Version="2.6.9" />
-  <PackageReference Include="Quick.Protocol.SerialPort" Version="2.6.9" />
+  <PackageReference Include="Quick.Protocol.Pipeline" Version="2.6.10" />
+  <PackageReference Include="Quick.Protocol.Tcp" Version="2.6.10" />  
+  <PackageReference Include="Quick.Protocol.WebSocket.Client" Version="2.6.10" />
+  <PackageReference Include="Quick.Protocol.Http.Client" Version="2.6.10" />
+  <PackageReference Include="Quick.Protocol.SerialPort" Version="2.6.10" />
 </ItemGroup>
 <ItemGroup>
   <ProjectReference Include="..\YiWuLian.Protocol\YiWuLian.Protocol.csproj" />
