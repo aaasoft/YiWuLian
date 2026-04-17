@@ -193,6 +193,13 @@ public class Config : ModelJsonConfig<ConfigModel>
         };
     }
 
+    protected FieldForGet getInterfaceConfigGroup(FunctionRequest request, ConfigModel requestModel, bool isReadOnly = false)
+    {
+        var model = requestModel ?? Model;
+        var defaultModel = ConfigModel.Default;
+        return model.QpInterface.GetConfigGroup(request, isReadOnly, nameof(model.QpInterface), "对外接口", defaultModel.QpInterface);
+    }
+
     protected override List<FieldForGet> innerGet(FunctionRequest request, ConfigModel requestModel, bool isReadOnly = false)
     {
         var model = requestModel ?? Model;
@@ -210,7 +217,7 @@ public class Config : ModelJsonConfig<ConfigModel>
                             t => ModelsJsonSerializerContext.Default2,
                             ()=> appConfigHandler,
                             t=>appConfigHandler=t),
-                        model.DeviceServiceConfig.GetConfigGroup(isReadOnly,nameof(model.DeviceServiceConfig),"设备服务", defaultModel.DeviceServiceConfig),
+                        getInterfaceConfigGroup(request,requestModel,isReadOnly),
                         getSmsServiceGroup(request,requestModel,isReadOnly)
                     ]
                 }

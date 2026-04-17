@@ -14,20 +14,20 @@ namespace YiWuLian.Server.Core.Interfaces.Device
         public static Manager Instance { get; } = new Manager();
 
         private QpInterfaceServiceContext allInterface;
-        private QpInterfaceServiceConfig deviceServiceConfig;
         private UnitStringConverting storageUnitStringConverting = UnitStringConverting.StorageUnitStringConverting;
         private int disconnectionDuartionMinutes;
 
 
         public void Start(IApplicationBuilder app, ConfigModel configModel)
         {
-            disconnectionDuartionMinutes = Agent.Instance.Config.NoticeConnectionChangedDurationMinutes;
-            deviceServiceConfig = Agent.Instance.Config.DeviceServiceConfig;
+            disconnectionDuartionMinutes = configModel.NoticeConnectionChangedDurationMinutes;
+            var config = configModel.QpInterface;
+
             allInterface = new QpInterfaceServiceContext(new ()
             {
                 InterfaceName = "设备接口",
                 WebBuilder = app,
-                Config = deviceServiceConfig,
+                Config = config,
                 InstructionSet = [YlIotProtocol.V1.Instruction.Instance],
                 Logger = AgentContext.LogInfo,
                 CommandExecuterManager = commandExecuterManagerForRegister,

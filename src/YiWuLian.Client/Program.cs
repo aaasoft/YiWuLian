@@ -10,7 +10,12 @@ class Program
     {
         //注册编码提供程序(支持GB2312等编码)
         System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
-        Quick.Protocol.QpAllClients.RegisterUriSchema();
+        
+        Quick.Protocol.Pipeline.QpPipelineClientOptions.RegisterUriSchema();
+        Quick.Protocol.WebSocket.Client.QpWebSocketClientOptions.RegisterUriSchema();
+        Quick.Protocol.Tcp.QpTcpClientOptions.RegisterUriSchema();
+        Quick.Protocol.Http.Client.QpHttpClientOptions.RegisterUriSchema();
+        
         Quick.Protocol.SerialPort.QpSerialPortClientOptions.RegisterUriSchema();
         Environment.CurrentDirectory = AppContext.BaseDirectory;
         Config = ConfigModel.Load();

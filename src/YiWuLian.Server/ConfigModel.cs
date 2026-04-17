@@ -54,19 +54,34 @@ public class ConfigModel
     };
 
     /// <summary>
-    /// 设备服务配置
+    /// 接口配置
     /// </summary>
-    public QpInterfaceServiceConfig DeviceServiceConfig { get; set; } = new()
+    public QpInterfaceServiceConfig QpInterface { get; set; } = new()
     {
-        Password = "123456",
-        WebSocketEnable = false,
-        WebSocketPath = "/ws/device",
-        PipeEnable = false,
-        PipeName = $"{nameof(Server)}.ClientInterface",
-        TcpEnable = true,
-        TcpListenAddress = "0.0.0.0",
-        TcpListenPort = 10067
+        EnableTcp = true,
+        PipelineServerOptions = new()
+        {
+            Password = "123456",
+            PipeName = $"{nameof(YiWuLian)}.{nameof(QpInterface)}"
+        },
+        WebSocketServerOptions = new()
+        {
+            Password = "123456",
+            Path = "/qp/ws"
+        },
+        HttpServerOptions = new()
+        {
+            Password = "123456",
+            Path = "/qp/http"
+        },
+        TcpServerOptions = new()
+        {
+            Password = "123456",
+            Address = "0.0.0.0",
+            Port = 10067
+        }
     };
+    
     /// <summary>
     /// 短信服务配置
     /// </summary>
