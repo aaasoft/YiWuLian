@@ -30,12 +30,13 @@ public class Agent : AbstractAgent
 #endif
         //支持GB18030编码
         Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-        //初始化计算引擎
-        //CalcEngine.Init();
-        //使用的数据库类型：MySQL
-            DbUtils.Init(
-                Quick.EntityFrameworkCore.Plus.MySql.MySqlDbContextConfigHandler.Info
-            );
+        //使用的数据库类型：SQLite(仅调试)、MySQL
+        DbUtils.Init(
+#if DEBUG
+            Quick.EntityFrameworkCore.Plus.SQLite.SQLiteDbContextConfigHandler.Info,
+#endif
+            Quick.EntityFrameworkCore.Plus.MySql.MySqlDbContextConfigHandler.Info
+        );
         //初始化模型加载逻辑
         ConfigDbContext.ModelBuilderHandler = ConfigDbContextProxy.OnModelCreating;
 
@@ -59,7 +60,7 @@ public class Agent : AbstractAgent
 
             AgentContext.LogInfo("确保数据库创建和更新...");
             ConfigDbContext.ConfigHandler.DatabaseEnsureCreatedAndUpdated(() => new ConfigDbContext());
-            ConfigDbContext.CacheContext.SetDoNotCacheTypes(typeof(YIS_ConnectionLog),typeof(YIS_NoticeLog));
+            ConfigDbContext.CacheContext.SetDoNotCacheTypes(typeof(YIS_ConnectionLog), typeof(YIS_NoticeLog));
             ConfigDbContext.CacheContext.LoadCache();
             AgentContext.LogInfo("数据库连接初始化完成.");
         }
@@ -89,7 +90,7 @@ public class Agent : AbstractAgent
 
             // Add MudBlazor services
             builder.Services.AddMudServices();
-            builder.Services.AddMudTranslations();            
+            builder.Services.AddMudTranslations();
             builder.Services.AddBlazoredLocalStorage();
             // Add services to the container.
             builder.Services.AddRazorComponents()
@@ -112,13 +113,21 @@ public class Agent : AbstractAgent
             app.MapStaticAssets();
             app.MapRazorComponents<App>()
                 .AddInteractiveServerRenderMode();
-            Core.Interfaces.Device.Manager.Instance.Start(app, Config);
             app.Start();
             AgentContext.LogInfo("Web服务启动完成，URL：" + Config.Urls);
         }
         catch (Exception ex)
         {
             AgentContext.LogWarn($"启动Web服务时出错，原因：{ExceptionUtils.GetExceptionMessage(ex)}");
+            return;
+        }
+        try
+        {
+            Core.Interfaces.Device.Manager.Instance.Start(app, Config);
+        }
+        catch (Exception ex)
+        {
+            AgentContext.LogWarn($"启动对外接口服务时出错，原因：{ExceptionUtils.GetExceptionString(ex)}");
         }
     }
 
