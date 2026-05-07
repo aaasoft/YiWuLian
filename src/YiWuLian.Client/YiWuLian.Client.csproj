@@ -13,7 +13,7 @@
 <ItemGroup>
   <PackageReference Include="Quick.Shell" Version="1.0.4" />
   <PackageReference Include="Quick.Build" Version="1.0.20" />
-  <PackageReference Include="System.ServiceProcess.ServiceController" Version="10.0.6" />
+  <PackageReference Include="System.ServiceProcess.ServiceController" Version="10.0.7" />
   <PackageReference Include="Quick.Protocol.Pipeline" Version="2.6.10" />
   <PackageReference Include="Quick.Protocol.Tcp" Version="2.6.10" />  
   <PackageReference Include="Quick.Protocol.WebSocket.Client" Version="2.6.10" />
