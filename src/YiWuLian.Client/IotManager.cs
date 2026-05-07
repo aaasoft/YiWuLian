@@ -2,6 +2,7 @@ using System.Text;
 using Quick.Protocol;
 using Quick.Protocol.Utils;
 using Quick.Utils;
+using Serilog;
 
 namespace YiWuLian.Client;
 
@@ -16,11 +17,22 @@ public class IotManager
     private void pushLog(string log)
     {
         sbLogs.Append(log);
-        Console.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + ": " + log);
+        var message = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + ": " + log;
+        if (Program.Config.SaveLogFile)
+            Log.Information(message);
+        Console.WriteLine(message);
     }
 
     public void Start()
     {
+        if (Program.Config.SaveLogFile)
+        {
+            Log.Logger = new LoggerConfiguration()
+                .WriteTo.File("log.txt",
+                    rollingInterval: RollingInterval.Day,
+                    rollOnFileSizeLimit: true)
+                .CreateLogger();
+        }
         qpClientOptions = QpClientOptions.Parse(new Uri(Program.Config.ConnectUrl));
         qpClientOptions.Password = Program.Config.ConnectPassword;
         qpClientOptions.InstructionSet = [YlIotProtocol.V1.Instruction.Instance];

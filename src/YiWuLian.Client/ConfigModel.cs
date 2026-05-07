@@ -33,6 +33,10 @@ public class ConfigModel
     /// 设备ICCID
     /// </summary>
     public string DeviceICCID { get; set; }
+    /// <summary>
+    /// 保存日志文件
+    /// </summary>
+    public bool SaveLogFile { get; set; } = false;
 
     /// <summary>
     /// 加载

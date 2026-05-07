@@ -101,6 +101,7 @@ namespace YiWuLian.Client.ArgsHandlers
                 Program.Config.ServiceListenPort = int.Parse(line);
                 changed = true;
             }
+
             ConsoleUtils.ConsoleWriteLine("易物联连接地址", ConsoleColor.Green);
             Console.WriteLine("说明：串口连接示例[qp.serial://./COM1?BaudRate=9600]，TCP连接示例[qp.tcp://192.168.1.3:10067]");
             Console.WriteLine($"当前值：{Program.Config.ConnectUrl}");
@@ -121,8 +122,9 @@ namespace YiWuLian.Client.ArgsHandlers
                 Program.Config.ConnectPassword = line;
                 changed = true;
             }
+
             ConsoleUtils.ConsoleWriteLine("设备IMEI", ConsoleColor.Green);
-            Console.WriteLine($"当前值：{Program.Config.DeviceIMEI}");
+            Console.WriteLine($"当前值：{Program.Config.DeviceIMEI}");            
             ConsoleUtils.ConsoleWrite(">", ConsoleColor.Green);
             line = Console.ReadLine();
             if (!string.IsNullOrEmpty(line))
@@ -130,6 +132,7 @@ namespace YiWuLian.Client.ArgsHandlers
                 Program.Config.DeviceIMEI = line;
                 changed = true;
             }
+
             ConsoleUtils.ConsoleWriteLine("设备ICCID", ConsoleColor.Green);
             Console.WriteLine($"当前值：{Program.Config.DeviceICCID}");
             ConsoleUtils.ConsoleWrite(">", ConsoleColor.Green);
@@ -139,6 +142,21 @@ namespace YiWuLian.Client.ArgsHandlers
                 Program.Config.DeviceICCID = line;
                 changed = true;
             }
+            
+            var boolDict=  new Dictionary<string,string>()
+            {
+                ["true"] = "是",
+                ["false"] = "否"
+            };
+            ConsoleUtils.ConsoleWriteLine("保存日志文件", ConsoleColor.Green);
+            Console.WriteLine($"当前值：{boolDict[Program.Config.SaveLogFile.ToString().ToLower()]}");
+            line = QbSelect.ArrowSelect(boolDict.ToArray(), selectedForegroundColor: ConsoleColor.Green);
+            if (!string.IsNullOrEmpty(line))
+            {
+                Program.Config.SaveLogFile = bool.Parse(line);
+                changed = true;
+            }
+
             if (changed)
             {
                 Program.Config.Save();
