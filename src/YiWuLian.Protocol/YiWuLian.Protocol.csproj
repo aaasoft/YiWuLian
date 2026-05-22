@@ -10,7 +10,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Quick.Protocol" Version="2.6.10" />
+    <PackageReference Include="Quick.Protocol" Version="2.6.11" />
   </ItemGroup>
 
 </Project>
