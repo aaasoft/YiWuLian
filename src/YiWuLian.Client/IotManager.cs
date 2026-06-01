@@ -46,13 +46,24 @@ public class IotManager
     {
         Task.Run(async () =>
         {
+            QpClient qpClient = null;
             try
             {
                 sbLogs.Clear();
                 pushLog($"[易物联]正在通过[{Program.Config.ConnectUrl}]连接。。。");
-                var qpClient = IotClient = qpClientOptions.CreateClient();
+                qpClient = IotClient = qpClientOptions.CreateClient();
                 await qpClient.ConnectAsync();
                 pushLog($"[易物联]连接成功。");
+            }
+            catch (Exception ex)
+            {
+                qpClient?.Close();
+                pushLog($"[易物联]连接到易物联时出错，原因：{ExceptionUtils.GetExceptionMessage(ex)}");
+                delayToConnectToYlIot(cancellationToken);
+                return;
+            }
+            try
+            {
                 pushLog($"[易物联]正在注册。。。");
                 var correctAnswer = CryptographyUtils.ComputeMD5Hash(Program.Config.DeviceIMEI + qpClient.AuthenticateQuestion + Program.Config.DeviceICCID);
                 await qpClient.SendCommand(new YlIotProtocol.V1.Commands.Register.Request()
@@ -74,9 +85,10 @@ public class IotManager
             }
             catch (Exception ex)
             {
-                IotClient?.Close();
-                pushLog($"[易物联]连接注册到易物联时出错，原因：{ExceptionUtils.GetExceptionMessage(ex)}");
+                qpClient?.Close();
+                pushLog($"[易物联]注册到易物联时出错，原因：{ExceptionUtils.GetExceptionMessage(ex)}");
                 delayToConnectToYlIot(cancellationToken);
+                return;
             }
         });
     }
