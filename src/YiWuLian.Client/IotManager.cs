@@ -27,6 +27,14 @@ public class IotManager
     {
         if (Program.Config.SaveLogFile)
         {
+            LogUtils.LogRaw = true;
+            LogUtils.LogConnection = true;
+            LogUtils.LogContent = true;
+            LogUtils.LogCommand = true;
+            LogUtils.LogHeartbeat = true;
+            LogUtils.LogPackage = true;
+            LogUtils.LogNotice = true;
+            LogUtils.SetLogHandler(pushLog);
             Log.Logger = new LoggerConfiguration()
                 .WriteTo.File("log.txt",
                     rollingInterval: RollingInterval.Day,
