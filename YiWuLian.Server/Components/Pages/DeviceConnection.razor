@@ -1,19 +1,25 @@
 ﻿@page "/device_connection"
-@using Quick.EntityFrameworkCore.Plus
 @using YiWuLian.Server.Models
 
 <PageTitle>设备连接</PageTitle>
 
 <MudDataGrid T="YIS_Device" Items="@Elements" SortMode="SortMode.Single" Filterable="true"
-    FilterMode="DataGridFilterMode.Simple">
+             FilterMode="DataGridFilterMode.Simple">
     <Columns>
         <PropertyColumn Property="x => x.Name" Title="名称" />
-        <PropertyColumn Property="x => x.ConnectionInfo.GetDeviceConnectStatus()" Filterable="false" Sortable="false" Title="连接状态" />
-        <PropertyColumn Property="x => x.ConnectionInfo.ClientProgram" Filterable="false" Sortable="false"  Title="客户端" />
-        <PropertyColumn Property="x => x.ConnectionInfo.ConnectTime" Filterable="false" Sortable="false"  Title="连接时间" />
-        <PropertyColumn Property="x => x.ConnectionInfo.DisconnectTime" Filterable="false" Sortable="false"  Title="断开时间" />
-        <PropertyColumn Property="x => x.ConnectionInfo.Channel.BytesSent" Format="N0" Filterable="false" Sortable="false"  Title="已发送" />
-        <PropertyColumn Property="x => x.ConnectionInfo.Channel.BytesReceived" Format="N0" Filterable="false" Sortable="false"  Title="已接收" />
+        <PropertyColumn Property="x => x.ConnectionInfo.GetDeviceConnectStatus()" Filterable="false" Sortable="false"
+                        Title="连接状态" />
+        <PropertyColumn Property="x => x.ConnectionInfo.ClientProgram" Filterable="false" Sortable="false"
+                        Title="客户端" />
+        <PropertyColumn Property="x => x.ConnectionInfo.ConnectTime" Filterable="false" Sortable="false" Title="连接时间" />
+        <PropertyColumn Property="x => x.ConnectionInfo.DisconnectTime" Filterable="false" Sortable="false"
+                        Title="断开时间" />
+        <PropertyColumn Property="x => x.ConnectionInfo.Channel.Options.InternalTransportTimeout" Format="N0"
+                        Filterable="false" Sortable="false" Title="传输超时" />
+        <PropertyColumn Property="x => x.ConnectionInfo.Channel.BytesSent" Format="N0" Filterable="false"
+                        Sortable="false" Title="已发送" />
+        <PropertyColumn Property="x => x.ConnectionInfo.Channel.BytesReceived" Format="N0" Filterable="false"
+                        Sortable="false" Title="已接收" />
     </Columns>
     <PagerContent>
         <MudDataGridPager T="YIS_Device" />
