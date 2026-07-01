@@ -25,12 +25,12 @@ public class DeviceConnectionInfo
     /// </summary>
     /// <returns></returns>
     public string GetDeviceConnectStatus() => IsConnected ? "已连接" : string.Empty;
-    public string GetTransformTimeoutString()
+    public int? GetTransformTimeoutString()
     {
         var options = Channel?.Options;
-        if(options==null)
+        if (options == null)
             return null;
-        return $"{options.InternalTransportTimeout / 1000 : N0}秒";
+        return options.InternalTransportTimeout;
     }
 
     /// <summary>
