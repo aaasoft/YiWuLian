@@ -25,6 +25,14 @@ public class DeviceConnectionInfo
     /// </summary>
     /// <returns></returns>
     public string GetDeviceConnectStatus() => IsConnected ? "已连接" : string.Empty;
+    public string GetTransformTimeoutString()
+    {
+        var options = Channel?.Options;
+        if(options==null)
+            return null;
+        return $"{options.InternalTransportTimeout / 1000 : N0}秒";
+    }
+
     /// <summary>
     /// 重新生成连接取消令牌
     /// </summary>
