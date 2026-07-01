@@ -28,7 +28,8 @@ public class IotManager
         qpClientOptions = QpClientOptions.Parse(new Uri(Program.Config.ConnectUrl));
         qpClientOptions.Password = Program.Config.ConnectPassword;
         qpClientOptions.InstructionSet = [YlIotProtocol.V1.Instruction.Instance];
-        qpClientOptions.TransportTimeout = 30000;
+        if (qpClientOptions.TransportTimeout < 30000)
+            qpClientOptions.TransportTimeout = 30000;
         if (Program.Config.SaveLogFile)
         {
             qpClientOptions.Logger = new QpLogger(pushLog)
