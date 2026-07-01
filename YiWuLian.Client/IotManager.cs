@@ -25,26 +25,29 @@ public class IotManager
 
     public void Start()
     {
+        qpClientOptions = QpClientOptions.Parse(new Uri(Program.Config.ConnectUrl));
+        qpClientOptions.Password = Program.Config.ConnectPassword;
+        qpClientOptions.InstructionSet = [YlIotProtocol.V1.Instruction.Instance];
+        qpClientOptions.TransportTimeout = 30000;
         if (Program.Config.SaveLogFile)
         {
-            LogUtils.LogRaw = true;
-            LogUtils.LogConnection = true;
-            LogUtils.LogContent = true;
-            LogUtils.LogCommand = true;
-            LogUtils.LogHeartbeat = true;
-            LogUtils.LogPackage = true;
-            LogUtils.LogNotice = true;
-            LogUtils.SetLogHandler(pushLog);
+            qpClientOptions.Logger = new QpLogger(pushLog)
+            {
+                LogRaw = true,
+                LogConnection = true,
+                LogContent = true,
+                LogCommand = true,
+                LogHeartbeat = true,
+                LogPackage = true,
+                LogNotice = true
+            };
             Log.Logger = new LoggerConfiguration()
                 .WriteTo.File("log.txt",
                     rollingInterval: RollingInterval.Day,
                     rollOnFileSizeLimit: true)
                 .CreateLogger();
         }
-        qpClientOptions = QpClientOptions.Parse(new Uri(Program.Config.ConnectUrl));
-        qpClientOptions.Password = Program.Config.ConnectPassword;
-        qpClientOptions.InstructionSet = [YlIotProtocol.V1.Instruction.Instance];
-        qpClientOptions.TransportTimeout = 30000;
+
         cts?.Cancel();
         cts = new();
         beginConnectToYlIot(cts.Token);
