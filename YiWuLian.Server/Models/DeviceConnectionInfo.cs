@@ -25,7 +25,7 @@ public class DeviceConnectionInfo
     /// </summary>
     /// <returns></returns>
     public string GetDeviceConnectStatus() => IsConnected ? "已连接" : string.Empty;
-    public int? GetTransformTimeoutString()
+    public int? GetTransportTimeout()
     {
         var options = Channel?.Options;
         if (options == null)
