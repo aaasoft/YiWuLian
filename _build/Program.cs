@@ -9,12 +9,12 @@ var version = "1.0." + DateTime.Now.ToString("yyyy.Mdd");
 //准备目录变量
 var appFolder = QbFolder.GetAppFolder();
 if (appFolder == Environment.CurrentDirectory)
-    Environment.CurrentDirectory = Path.GetFullPath("../../../../../");
+    Environment.CurrentDirectory = Path.GetFullPath("../../../../");
 var baseFolder = Environment.CurrentDirectory;
 
 var productDict = new Dictionary<string, string>();
 
-foreach (var fi in new DirectoryInfo("src").GetDirectories())
+foreach (var fi in new DirectoryInfo(baseFolder).GetDirectories())
 {
     var yiqidongImageFile = Path.Combine(fi.FullName, "YiQiDong.Image.json");
     if (!File.Exists(yiqidongImageFile))
@@ -39,8 +39,8 @@ foreach (var productDir in productDirs)
     {
         var configuration = arch == "any" ? "Release" : "ReleaseSelfContained";
 
-        var publishFolder = $"src/{productDir}/bin/{configuration}/publish";
-        var productName = QbJson.ReadString(Path.Combine($"src/{productDir}/YiQiDong.Image.json"), "Name");
+        var publishFolder = $"{productDir}/bin/{configuration}/publish";
+        var productName = QbJson.ReadString(Path.Combine($"{productDir}/YiQiDong.Image.json"), "Name");
         var outFolder = Path.GetFullPath("bin");
         if (!Directory.Exists(outFolder))
             Directory.CreateDirectory(outFolder);
@@ -52,22 +52,22 @@ foreach (var productDir in productDirs)
         Console.WriteLine("----------------------------------");
         Console.WriteLine($"正在删除{configuration}目录...");
         //先删除之前的编译目录
-        QbFolder.DeleteFolders("src", configuration, SearchOption.AllDirectories);
+        QbFolder.DeleteFolders(productDir, configuration, SearchOption.AllDirectories);
         //再删除ymg文件
         QbFile.DeleteFiles("bin", $"{productName}-{version}.ymg");
 
         Console.WriteLine($"正在发布{productName}项目...");
         if (arch == "any")
         {
-            QbCommand.Run("dotnet", $"publish src/{productDir} -c {configuration} -o {publishFolder} --no-self-contained");
+            QbCommand.Run("dotnet", $"publish {productDir} -c {configuration} -o {publishFolder} --no-self-contained");
             QbDotNet.KeepPublishRuntimes(publishFolder, "win-x64", "linux-x64", "linux-arm");
         }
         else
         {
-            QbCommand.Run("dotnet", $"publish src/{productDir} -c {configuration} -o {publishFolder} -r {arch} --self-contained");
+            QbCommand.Run("dotnet", $"publish {productDir} -c {configuration} -o {publishFolder} -r {arch} --self-contained");
         }
         //复制文件
-        QbFile.CopyFiles($"src/{productDir}", publishFolder, "YiQiDong.Image.*", true);
+        QbFile.CopyFiles($"{productDir}", publishFolder, "YiQiDong.Image.*", true);
 
         //修改容器信息文件中的版本号
         QbJson.WriteString(Path.Combine(publishFolder, "YiQiDong.Image.json"), "Version", version);
