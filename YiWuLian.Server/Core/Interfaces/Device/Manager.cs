@@ -45,7 +45,7 @@ namespace YiWuLian.Server.Core.Interfaces.Device
                 var connectionInfo = device.ConnectionInfo;
                 connectionInfo.RenewConnectCancellationToken();
                 if (connectionInfo.IsConnected)
-                    connectionInfo.Channel?.Disconnect();
+                    connectionInfo.Channel?.Dispose();
             }
         }
 
@@ -114,7 +114,7 @@ namespace YiWuLian.Server.Core.Interfaces.Device
                 //如果此设备已经有连接，则断开之前的连接
                 if (deviceConnectionInfo.IsConnected)
                 {
-                    deviceConnectionInfo.Channel?.Disconnect();
+                    deviceConnectionInfo.Channel?.Dispose();
                     Thread.Sleep(100);
                 }
                 //更新连接信息
@@ -126,7 +126,7 @@ namespace YiWuLian.Server.Core.Interfaces.Device
                 channelDisconnectHandler = (sender, e) =>
                 {
                     channel.Disconnected -= channelDisconnectHandler;
-                    channel.Disconnect();
+                    channel.Dispose();
                     deviceConnectionInfo.SetConnected(false);
                     //流量信息
                     var dataUsageFullString = $"，使用流量: 发送[{storageUnitStringConverting.GetString(channel.BytesSent, 2, true)}B],接收[{storageUnitStringConverting.GetString(channel.BytesReceived, 2, true)}B]";
@@ -232,7 +232,7 @@ namespace YiWuLian.Server.Core.Interfaces.Device
 
         public void OnDeviceDeleted(YIS_Device device)
         {
-            device.ConnectionInfo.Channel?.Disconnect();
+            device.ConnectionInfo.Channel?.Dispose();
             device.ConnectionInfo.RenewConnectCancellationToken();
         }
     }
