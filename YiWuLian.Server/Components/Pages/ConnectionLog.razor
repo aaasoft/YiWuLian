@@ -1,20 +1,20 @@
 ﻿@page "/connection_log"
-@using Quick.EntityFrameworkCore.Plus
 
 <PageTitle>连接日志</PageTitle>
 
-<MudToolBar>
-    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="Refresh">刷新</MudButton>
-</MudToolBar>
-
-<MudDataGrid T="Models.YIS_ConnectionLog" Items="@Elements" SortMode="SortMode.Single" Filterable="true"
-    FilterMode="DataGridFilterMode.Simple">
+<MudDataGrid @ref="dataGrid" T="Models.YIS_ConnectionLog" ServerData="LoadServerDataAsync" SortMode="SortMode.None" Filterable="false">
+    <ToolBarContent>
+        <MudText Typo="Typo.h6">连接日志</MudText>
+        <MudSpacer />
+        <MudTextField T="string" ValueChanged="@(s=>OnSearch(s))" Placeholder="查询" Adornment="Adornment.Start"
+                      AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+    </ToolBarContent>
     <Columns>
-        <PropertyColumn Property="x => x.OrderNo" Title="序号" Filterable="false" Sortable="false" Hidden="true" />
-        <PropertyColumn Property="x => x.DeviceId" Title="设备编号" Sortable="false" />
-        <PropertyColumn Property="x => x.DeviceName" Title="设备名称" Sortable="false" />
-        <PropertyColumn Property="x => x.Time" Title="时间" InitialDirection="SortDirection.Descending" />
-        <PropertyColumn Property="x => x.Content" Title="内容" Filterable="false" Sortable="false" />
+        <PropertyColumn Property="x => x.OrderNo" Title="序号" Hidden="true" />
+        <PropertyColumn Property="x => x.DeviceId" Title="设备编号" />
+        <PropertyColumn Property="x => x.DeviceName" Title="设备名称" />
+        <PropertyColumn Property="x => x.Time" Title="时间" />
+        <PropertyColumn Property="x => x.Content" Title="内容" />
     </Columns>
     <PagerContent>
         <MudDataGridPager T="Models.YIS_ConnectionLog" />

@@ -5,34 +5,38 @@ using Quick.EntityFrameworkCore.Plus;
 
 namespace YiWuLian.Server.Components.Pages;
 
-public partial class NoticeLog : ComponentBase, IDisposable
+public partial class NoticeLog : ComponentBase
 {
     [Parameter]
     public string DeviceId { get; set; }
 
-    private IEnumerable<YIS_NoticeLog> Elements;
-    private ConfigDbContext dbContext;
+    private MudDataGrid<YIS_NoticeLog> dataGrid;
+    private string searchString = null;
 
-    protected override void OnInitialized()
+    private Task OnSearch(string text)
     {
-        dbContext = new();
+        searchString = text;
+        return dataGrid.ReloadServerData();
     }
 
-    protected override void OnParametersSet()
+    private async Task<GridData<YIS_NoticeLog>> LoadServerDataAsync(GridState<YIS_NoticeLog> state, CancellationToken cancellationToken)
     {
-        Refresh();
-    }
+        using (var dbContext = new ConfigDbContext())
+        {
+            IQueryable<YIS_NoticeLog> query = query = dbContext.Set<YIS_NoticeLog>();
+            if (!string.IsNullOrEmpty(DeviceId))
+                query = query.Where(t => t.DeviceId == DeviceId).OrderByDescending(t => t.Time);
+            if (!string.IsNullOrWhiteSpace(searchString))
+                query = query.Where(t => t.DeviceId.Contains(searchString) || t.DeviceName.Contains(searchString));
+            query = query.OrderByDescending(t => t.Time);
 
-    private void Refresh()
-    {
-        if (string.IsNullOrEmpty(DeviceId))
-            Elements = dbContext.Set<YIS_NoticeLog>().OrderByDescending(t=>t.Time);
-        else
-            Elements = dbContext.Set<YIS_NoticeLog>().Where(t => t.DeviceId == DeviceId).OrderByDescending(t=>t.Time);
-    }
-
-    public void Dispose()
-    {
-        dbContext.Dispose();
+            var totalItems = query.Count();
+            var pagedData = query.Skip(state.Page * state.PageSize).Take(state.PageSize).ToArray();
+            return new GridData<YIS_NoticeLog>
+            {
+                TotalItems = totalItems,
+                Items = pagedData
+            };
+        }
     }
 }
