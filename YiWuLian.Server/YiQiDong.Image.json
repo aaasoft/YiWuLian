@@ -2,6 +2,5 @@
   "DefaultId": "YiWuLian.Server",
   "Name": "易物联服务端",
   "Version": "1.0.x.x",
-  "Description": "[易物联服务端]是为嵌入式、服务器等提供物联网服务的程序。",
-  "UseStdioComm" : false
+  "Description": "[易物联服务端]是为嵌入式、服务器等提供物联网服务的程序。"
 }

@@ -16,13 +16,13 @@
 
   <ItemGroup>
     <PackageReference Include="MudBlazor" Version="9.7.0" />
-    <PackageReference Include="MudBlazor.Translations" Version="3.3.0" />
+    <PackageReference Include="MudBlazor.Translations" Version="3.4.0" />
     <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Quick.EntityFrameworkCore.Plus.SQLite" Version="2026.10.523" />
     <PackageReference Include="Quick.EntityFrameworkCore.Plus.MySql" Version="2026.10.523" />
     <PackageReference Include="Quick.Protocol.InterfaceService" Version="2.7.3" />
     <PackageReference Include="Quick.Protocol.WebSocket.Server.AspNetCore" Version="2.7.3" />
     <PackageReference Include="Quick.Sms.CMCC.CloudMAS" Version="2026.2.520" />
-    <PackageReference Include="YiQiDong.Core" Version="2026.21.717" />
+    <PackageReference Include="YiQiDong.Core" Version="2026.24.729" />
     <PackageReference Include="Blazored.LocalStorage" Version="4.5.0" />
   </ItemGroup>
   
