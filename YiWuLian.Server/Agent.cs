@@ -86,6 +86,7 @@ public class Agent : AbstractAgent
             };
 #endif
             var builder = WebApplication.CreateBuilder(webApplicationOptions);
+            builder.Logging.ClearProviders();
             builder.Services.AddLocalization();
 
             // Add MudBlazor services
