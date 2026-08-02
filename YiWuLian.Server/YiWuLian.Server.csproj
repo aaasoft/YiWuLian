@@ -22,7 +22,7 @@
     <PackageReference Include="Quick.Protocol.InterfaceService" Version="2.8.0" />
     <PackageReference Include="Quick.Protocol.WebSocket.Server.AspNetCore" Version="2.8.0" />
     <PackageReference Include="Quick.Sms.CMCC.CloudMAS" Version="2026.2.520" />
-    <PackageReference Include="YiQiDong.Core" Version="2026.28.731" />
+    <PackageReference Include="YiQiDong.Core" Version="2026.29.801" />
     <PackageReference Include="Blazored.LocalStorage" Version="4.5.0" />
   </ItemGroup>
   

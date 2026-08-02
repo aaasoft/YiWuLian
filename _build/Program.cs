@@ -74,6 +74,7 @@ foreach (var productDir in productDirs)
         QbJson.Write(Path.Combine(publishFolder, "YiQiDong.Image.json"), "Platform", new string[] { arch });
         if (arch == "any")
         {
+            QbJson.Write(Path.Combine(publishFolder, "YiQiDong.Image.json"), "AgentExecute", "dotnet");
             QbJson.Write(Path.Combine(publishFolder, "YiQiDong.Image.json"), "AgentStartup", $"{productDir}.dll");
             QbJson.Write(Path.Combine(publishFolder, "YiQiDong.Image.json"), "Runtime", new[] { "dotnet-10.0" });
         }
