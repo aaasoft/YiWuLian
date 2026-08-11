@@ -73,10 +73,9 @@ namespace YiWuLian.Server.Functions
                             new FieldForGet()
                             {
                                 Type = FieldType.ContainerTableTd,
-                                Children = new []
-                                {
+                                Children = [
                                     new FieldForGet(){ Type = FieldType.HtmlPre, Value=item.Description },
-                                }
+                                ]
                             }
                         ]
                     });
@@ -111,14 +110,14 @@ namespace YiWuLian.Server.Functions
                                 new()
                                 {
                                     Type = FieldType.ContainerTableBody,
-                                    Children = tableBodyRowList.ToArray()
+                                    Children = tableBodyRowList
                                 }
                             ]
                         }
                     ]
                 });
             }
-            return new FieldForGet[] { new FieldForGet() { Type = FieldType.ContainerTab, Children = list.ToArray() } };
+            return new FieldForGet[] { new FieldForGet() { Type = FieldType.ContainerTab, Children = list } };
         }
     }
 }

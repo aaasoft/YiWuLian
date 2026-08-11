@@ -1,11 +1,11 @@
 ﻿using Quick.Protocol;
 using Quick.EntityFrameworkCore.Plus;
-using Quick.Protocol.Utils;
 using YiWuLian.Server.Models;
 using YiWuLian.Server.Core.NoticeTypes;
 using Quick.Utils;
 using YiQiDong.Agent;
 using Quick.Protocol.InterfaceService;
+using YiWuLian.Protocol.Utils;
 
 namespace YiWuLian.Server.Core.Interfaces.Device
 {
@@ -172,7 +172,7 @@ namespace YiWuLian.Server.Core.Interfaces.Device
                     }
                 };
                 channel.Disconnected += channelDisconnectHandler;
-                channel.AddCommandExecuterManager(commandExecuterManager);
+                channel.RegisterCommandExecuterManagers([commandExecuterManager]);
                 //客户端
                 string clientProgramFullString = null;
                 if (!string.IsNullOrEmpty(request.ClientProgram))

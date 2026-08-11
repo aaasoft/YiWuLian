@@ -1,8 +1,8 @@
 using System.Text;
 using Quick.Protocol;
-using Quick.Protocol.Utils;
 using Quick.Utils;
 using Serilog;
+using YiWuLian.Protocol.Utils;
 
 namespace YiWuLian.Client;
 
@@ -69,7 +69,7 @@ public class IotManager
             }
             catch (Exception ex)
             {
-                qpClient?.Close();
+                qpClient?.Dispose();
                 pushLog($"[易物联]连接到易物联时出错，原因：{ExceptionUtils.GetExceptionMessage(ex)}");
                 delayToConnectToYlIot(cancellationToken);
                 return;
@@ -89,7 +89,7 @@ public class IotManager
                 qpClient_Disconnected = (sender, e) =>
                 {
                     qpClient.Disconnected -= qpClient_Disconnected;
-                    qpClient.Close();
+                    qpClient.Dispose();
                     pushLog($"[易物联]连接已经断开，原因：{ExceptionUtils.GetExceptionMessage(qpClient.LastException)}");
                     delayToConnectToYlIot(cancellationToken);
                 };
@@ -97,7 +97,7 @@ public class IotManager
             }
             catch (Exception ex)
             {
-                qpClient?.Close();
+                qpClient?.Dispose();
                 pushLog($"[易物联]注册到易物联时出错，原因：{ExceptionUtils.GetExceptionMessage(ex)}");
                 delayToConnectToYlIot(cancellationToken);
                 return;
@@ -120,7 +120,7 @@ public class IotManager
     {
         cts?.Cancel();
         cts = null;
-        IotClient?.Close();
+        IotClient?.Dispose();
         IotClient = null;
     }
 
