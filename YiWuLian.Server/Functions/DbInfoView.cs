@@ -34,7 +34,7 @@ namespace YiWuLian.Server.Functions
             this.getDbContextFunc = getDbContextFunc;
         }
 
-        public override FieldForGet[] Execute(FunctionRequest request)
+        public override List<FieldForGet> Execute(FunctionRequest request)
         {
             if (tables == null)
             {
@@ -117,7 +117,7 @@ namespace YiWuLian.Server.Functions
                     ]
                 });
             }
-            return new FieldForGet[] { new FieldForGet() { Type = FieldType.ContainerTab, Children = list } };
+            return [ new FieldForGet() { Type = FieldType.ContainerTab, Children = list } ];
         }
     }
 }

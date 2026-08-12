@@ -18,7 +18,7 @@ public class Test : AbstractFunction
 
     private const string BTN_SEND = nameof(BTN_SEND);
 
-    public override FieldForGet[] Execute(FunctionRequest request)
+    public override List<FieldForGet> Execute(FunctionRequest request)
     {
         var list = new List<FieldForGet>();
         if (request != null)
@@ -92,6 +92,6 @@ public class Test : AbstractFunction
                 Type =  FieldType.Button
             }
         ]);
-        return list.ToArray();
+        return list;
     }
 }
