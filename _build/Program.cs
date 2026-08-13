@@ -2,6 +2,7 @@
 using SharpCompress.Archives;
 using SharpCompress.Archives.Zip;
 using SharpCompress.Common;
+using System.Security.Cryptography;
 
 //版本号
 var version = "1.0." + DateTime.Now.ToString("yyyy.Mdd");
@@ -11,7 +12,7 @@ var appFolder = QbFolder.GetAppFolder();
 if (appFolder == Environment.CurrentDirectory)
     Environment.CurrentDirectory = Path.GetFullPath("../../../../");
 var baseFolder = Environment.CurrentDirectory;
-
+var outFolder = Path.GetFullPath("bin");
 var productDict = new Dictionary<string, string>();
 
 foreach (var fi in new DirectoryInfo(baseFolder).GetDirectories())
@@ -35,16 +36,25 @@ if (selectArchs == null || selectArchs.Length == 0)
 
 foreach (var productDir in productDirs)
 {
-    foreach (var arch in selectArchs)
+    foreach (var rid in selectArchs)
     {
-        var configuration = arch == "any" ? "Release" : "ReleaseSelfContained";
+        var configuration = rid == "any" ? "Release" : "ReleaseSelfContained";
 
-        var publishFolder = $"{productDir}/bin/{configuration}/publish";
+        var publishFolder = string.Empty;
+        var outFile = string.Empty;
         var productName = QbJson.ReadString(Path.Combine($"{productDir}/YiQiDong.Image.json"), "Name");
-        var outFolder = Path.GetFullPath("bin");
+        if (rid == "any")
+        {
+            publishFolder = $"{productDir}/bin/Release/publish";
+            outFile = Path.Combine(outFolder, $"{productName}-{version}.ymg");
+        }
+        else
+        {
+            publishFolder = $"{productDir}/bin/Release/{rid}/publish";
+            outFile = Path.Combine(outFolder, $"{productName}-{version}-{rid}.ymg");
+        }        
         if (!Directory.Exists(outFolder))
             Directory.CreateDirectory(outFolder);
-        var outFile = Path.Combine(outFolder, $"{productName}-{version}-{arch}.ymg");
 
         //开始
         Console.WriteLine("----------------------------------");
@@ -57,22 +67,22 @@ foreach (var productDir in productDirs)
         QbFile.DeleteFiles("bin", $"{productName}-{version}.ymg");
 
         Console.WriteLine($"正在发布{productName}项目...");
-        if (arch == "any")
+        if (rid == "any")
         {
             QbCommand.Run("dotnet", $"publish {productDir} -c {configuration} -o {publishFolder} --no-self-contained");
             QbDotNet.KeepPublishRuntimes(publishFolder, "win-x64", "linux-x64", "linux-arm");
         }
         else
         {
-            QbCommand.Run("dotnet", $"publish {productDir} -c {configuration} -o {publishFolder} -r {arch} --self-contained");
+            QbCommand.Run("dotnet", $"publish {productDir} -c {configuration} -o {publishFolder} -r {rid} --self-contained");
         }
         //复制文件
         QbFile.CopyFiles($"{productDir}", publishFolder, "YiQiDong.Image.*", true);
 
         //修改容器信息文件中的版本号
         QbJson.WriteString(Path.Combine(publishFolder, "YiQiDong.Image.json"), "Version", version);
-        QbJson.Write(Path.Combine(publishFolder, "YiQiDong.Image.json"), "Platform", new string[] { arch });
-        if (arch == "any")
+        QbJson.Write(Path.Combine(publishFolder, "YiQiDong.Image.json"), "Platform", new string[] { rid });
+        if (rid == "any")
         {
             QbJson.Write(Path.Combine(publishFolder, "YiQiDong.Image.json"), "AgentExecute", "dotnet");
             QbJson.Write(Path.Combine(publishFolder, "YiQiDong.Image.json"), "AgentStartup", $"{productDir}.dll");
@@ -81,7 +91,7 @@ foreach (var productDir in productDirs)
         else
         {
             var agentStartup = productDir;
-            if (arch.StartsWith("win-"))
+            if (rid.StartsWith("win-"))
                 agentStartup += ".exe";
             QbJson.Write(Path.Combine(publishFolder, "YiQiDong.Image.json"), "AgentExecute", agentStartup);
         }
