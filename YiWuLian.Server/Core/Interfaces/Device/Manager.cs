@@ -65,7 +65,7 @@ namespace YiWuLian.Server.Core.Interfaces.Device
             noticeHandlerManager = new NoticeHandlerManager();
         }
 
-        private YlIotProtocol.V1.Commands.GetNoticeTypes.Response GetNoticeTypes(QpChannel channel, YlIotProtocol.V1.Commands.GetNoticeTypes.Request request)
+        private async ValueTask<YlIotProtocol.V1.Commands.GetNoticeTypes.Response> GetNoticeTypes(QpChannel channel, YlIotProtocol.V1.Commands.GetNoticeTypes.Request request)
         {
             return new()
             {
@@ -81,7 +81,7 @@ namespace YiWuLian.Server.Core.Interfaces.Device
             };
         }
 
-        private YlIotProtocol.V1.Commands.SendNotice.Response SendNotice(QpChannel channel, YlIotProtocol.V1.Commands.SendNotice.Request request)
+        private async ValueTask<YlIotProtocol.V1.Commands.SendNotice.Response> SendNotice(QpChannel channel, YlIotProtocol.V1.Commands.SendNotice.Request request)
         {
             var noticeType = NoticeTypeManager.Instance.Get(request.NoticeTypeId);
             var device = channel.Tag as YIS_Device;
@@ -94,7 +94,7 @@ namespace YiWuLian.Server.Core.Interfaces.Device
             return new TimeSpan(timespan.Days, timespan.Hours, timespan.Minutes, timespan.Seconds).ToString();
         }
 
-        private YlIotProtocol.V1.Commands.Register.Response ExecuteRegister(QpChannel channel, YlIotProtocol.V1.Commands.Register.Request request)
+        private async ValueTask<YlIotProtocol.V1.Commands.Register.Response> ExecuteRegister(QpChannel channel, YlIotProtocol.V1.Commands.Register.Request request)
         {
             try
             {
@@ -115,7 +115,7 @@ namespace YiWuLian.Server.Core.Interfaces.Device
                 if (deviceConnectionInfo.IsConnected)
                 {
                     deviceConnectionInfo.Channel?.Disconnect();
-                    Thread.Sleep(100);
+                    await Task.Delay(100);
                 }
                 //更新连接信息
                 deviceConnectionInfo.ClientProgram = request.ClientProgram;
@@ -203,7 +203,7 @@ namespace YiWuLian.Server.Core.Interfaces.Device
                         //短信通知
                         if (Agent.Instance.Config.SmsConfig.Enable && !string.IsNullOrEmpty(Agent.Instance.Config.SmsConfig.AdminNoticeTarget))
                         {
-                            Task.Run(() =>
+                            await Task.Run(() =>
                             {
                                 var noticeType = NoticeTypeManager.Instance.Get<NoticeTypes.SmsNoticeType.NoticeType>();
                                 noticeType.SendNotice(new YIS_Device()
