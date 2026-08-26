@@ -32,16 +32,6 @@ public class IotManager
             qpClientOptions.TransportTimeout = 30000;
         if (Program.Config.SaveLogFile)
         {
-            qpClientOptions.Logger = new QpLogger(pushLog)
-            {
-                LogRaw = true,
-                LogConnection = true,
-                LogContent = true,
-                LogCommand = true,
-                LogHeartbeat = true,
-                LogPackage = true,
-                LogNotice = true
-            };
             Log.Logger = new LoggerConfiguration()
                 .WriteTo.File("log.txt",
                     rollingInterval: RollingInterval.Day,
