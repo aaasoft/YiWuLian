@@ -172,7 +172,7 @@ namespace YiWuLian.Server.Core.Interfaces.Device
                     }
                 };
                 channel.Disconnected += channelDisconnectHandler;
-                channel.RegisterCommandExecuterManagers([commandExecuterManager]);
+                channel.RegisterCommandExecuterManager(commandExecuterManager);
                 //客户端
                 string clientProgramFullString = null;
                 if (!string.IsNullOrEmpty(request.ClientProgram))
