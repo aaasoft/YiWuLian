@@ -103,7 +103,7 @@ namespace YiWuLian.Client.ArgsHandlers
             }
 
             ConsoleUtils.ConsoleWriteLine("易物联连接地址", ConsoleColor.Green);
-            Console.WriteLine("说明：串口连接示例[qp.serial://./COM1?BaudRate=9600?TransportTimeout=30000]，TCP连接示例[qp.tcp://192.168.1.3:10067?TransportTimeout=30000]");
+            Console.WriteLine("说明：串口连接示例[qp.serial://./COM1?BaudRate=9600&TransportTimeout=30000]，TCP连接示例[qp.tcp://192.168.1.3:10067?TransportTimeout=30000]");
             Console.WriteLine($"当前值：{Program.Config.ConnectUrl}");
             ConsoleUtils.ConsoleWrite(">", ConsoleColor.Green);
             line = Console.ReadLine();
